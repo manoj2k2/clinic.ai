@@ -1,0 +1,6 @@
+Patient: John Doe
+Observation Type: Blood Pressure
+Systolic: 120 mmHg
+Diastolic: 80 mmHg
+Date: 2023-09-01
+Status: Final

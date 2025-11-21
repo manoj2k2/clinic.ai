@@ -1,0 +1,11 @@
+<div class="header">
+  <h2>Clinic - Patient App</h2>
+  <div style="margin-left:auto">
+    <button *ngIf="!auth.isLoggedIn()" (click)="auth.login()">Login</button>
+    <button *ngIf="auth.isLoggedIn()" (click)="auth.logout()">Logout</button>
+  </div>
+</div>
+<nav style="margin: 8px 0">
+  <a routerLink="/patients" style="margin-right:12px">Patients</a>
+</nav>
+<router-outlet></router-outlet>
