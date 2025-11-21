@@ -1,0 +1,33 @@
+{
+  "name": "clinic-fe",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "npx -p @angular/cli@16 ng serve --port 4200 --proxy-config proxy.conf.json",
+    "startnpm": "ng serve --port 4200 --proxy-config proxy.conf.json",
+
+    "build": "npx -p @angular/cli@16 ng build",
+    "test": "echo \"No tests configured\" && exit 0"
+  },
+  "dependencies": {
+    "@angular/animations": "^16.2.0",
+    "@angular/common": "^16.2.0",
+    "@angular/compiler": "^16.2.0",
+    "@angular/core": "^16.2.0",
+    "@angular/forms": "^16.2.0",
+    "@angular/platform-browser": "^16.2.0",
+    "@angular/platform-browser-dynamic": "^16.2.0",
+    "@angular/router": "^16.2.0",
+    "angular-oauth2-oidc": "^17.0.0",
+    "primeicons": "^7.0.0",
+    "primeng": "^16.0.0",
+    "rxjs": "~7.8.0",
+    "zone.js": "~0.13.0",    
+    "@angular/fire": "^7.5.0",
+    "firebase": "^9.22.0"
+  }
+  ,
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^16.2.0"
+  }
+}

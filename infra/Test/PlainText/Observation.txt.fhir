@@ -1,0 +1,35 @@
+{
+  "resourceType": "Patient",
+  "id": "example",
+  "identifier": [
+    {
+      "system": "http://hospital.smarthealth.org/mrn",
+      "value": "MRN123456"
+    }
+  ],
+  "name": [
+    {
+      "use": "official",
+      "family": "Doe",
+      "given": ["John"]
+    }
+  ],
+  "gender": "male",
+  "birthDate": "1985-06-15",
+  "address": [
+    {
+      "line": ["123 Main St"],
+      "city": "Springfield",
+      "state": "IL",
+      "postalCode": "62704",
+      "country": "USA"
+    }
+  ],
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "+1-555-123-4567",
+      "use": "mobile"
+    }
+  ]
+}

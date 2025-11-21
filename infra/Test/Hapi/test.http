@@ -1,0 +1,15 @@
+@hapiApi = http://localhost:8080/fhir
+@id = 2
+###
+curl -X POST {{hapiApi}}/Patient -H "Content-Type: application/json" -d  @infra/Test/Hapi/patient.json
+
+###
+curl "{{hapiApi}}/Patient?family=Chalmers&birthDate=1974-12-25"
+
+###
+curl {{hapiApi}}/Patient/4a30b88c-7e7e-4377-a65f-42bedb834d9c
+###
+
+curl {{hapiApi}}/Patient/{{id}}
+###
+curl -X PUT {{hapiApi}}/Patient/4a30b88c-7e7e-4377-a65f-42bedb834d9c -H "Content-Type: application/json" -d @src/fhirClient/patient.json

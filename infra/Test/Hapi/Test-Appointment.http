@@ -1,0 +1,46 @@
+### CREATE Appointment
+@hapiApi = http://localhost:8080/fhir
+POST {{hapiApi}}/Appointment
+Content-Type: application/json
+
+{
+    "resourceType": "Appointment",
+    "status": "booked",
+    "description": "Follow-up visit",
+    "start": "2025-08-10T10:00:00Z",
+    "end": "2025-08-10T10:30:00Z",
+    "participant": [
+        {
+            "actor": {
+                "reference": "Patient/67",
+                "display": "John Doe"
+            },
+            "status": "accepted"
+        },
+        {
+            "actor": {
+                "reference": "Practitioner/105",
+                "display": "Dr. Meera Sahani"
+            },
+            "status": "accepted"
+        }
+    ]
+}
+### Find key field , query the id and checks, validate, build json.
+
+### READ Appointment by ID (replace {id} with actual ID)
+GET {{hapiApi}}/Appointment/{id}
+
+### SEARCH Appointment by status
+GET {{hapiApi}}/Appointment?status=booked
+
+### UPDATE Appointment (replace {id} with actual ID)
+PUT {{hapiApi}}/Appointment/{id}
+Content-Type: application/json
+{
+    "description": "Updated follow-up visit",
+    "status": "arrived"
+}
+
+### DELETE Appointment (replace {id} with actual ID)
+DELETE {{hapiApi}}/Appointment/{id}

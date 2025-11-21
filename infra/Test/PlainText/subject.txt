@@ -1,0 +1,6 @@
+Patient Name: John Doe
+Gender: Male
+Birth Date: 1985-06-15
+Address: 123 Main St, Springfield, IL, USA
+Phone: +1-555-123-4567
+Identifier: MRN123456

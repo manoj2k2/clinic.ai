@@ -1,0 +1,54 @@
+@hapiApi = http://localhost:8080/fhir
+@id = 1
+### CREATE Practitioner
+POST {{hapiApi}}/Practitioner
+Content-Type: application/json
+
+{
+    "resourceType": "Practitioner",
+    "name": [
+        {
+            "family": "sahani",
+            "given": ["Meera"]
+        }
+    ],
+    "gender": "female",
+    "qualification": [
+        {
+            "code": {
+                "text": "General Practitioner"
+            }
+        }
+    ]
+}
+
+### READ Practitioner by ID (replace {id} with actual ID)
+GET {{hapiApi}}/Practitioner/{{id}}
+
+### SEARCH Practitioner by family name
+GET {{hapiApi}}/Practitioner?family=sahani
+
+### UPDATE Practitioner (replace {id} with actual ID)
+PUT {{hapiApi}}/Practitioner/{id}
+Content-Type: application/json
+
+{
+    "resourceType": "Practitioner",
+    "name": [
+        {
+            "family": "Smith",
+            "given": ["Alice", "Marie"]
+        }
+    ],
+    "gender": "female",
+    "qualification": [
+        {
+            "code": {
+                "text": "Specialist"
+            }
+        }
+    ]
+}
+
+### DELETE Practitioner (replace {id} with actual ID)
+DELETE{{hapiApi}}/Practitioner/{id}
