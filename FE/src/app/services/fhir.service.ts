@@ -4,11 +4,11 @@ import { Observable } from 'rxjs';
 
 @Injectable()
 export class FhirService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getPatients(): Observable<any> {
     // Proxy will forward /fhir to the HAPI server at localhost:8082
-    return this.http.get('/fhir/Patient?family=sahani');
+    return this.http.get('/fhir/Patient?gender=male');
   }
 
   getAppointmentsForPatient(patientId: string): Observable<any> {
@@ -30,4 +30,26 @@ export class FhirService {
   deletePatient(id: string): Observable<any> {
     return this.http.delete(`/fhir/Patient/${id}`);
   }
+
+  // Practitioner CRUD
+  getPractitioners(): Observable<any> {
+    return this.http.get('/fhir/Practitioner');
+  }
+
+  getPractitioner(id: string): Observable<any> {
+    return this.http.get(`/fhir/Practitioner/${id}`);
+  }
+
+  createPractitioner(practitioner: any): Observable<any> {
+    return this.http.post(`/fhir/Practitioner`, practitioner);
+  }
+
+  updatePractitioner(id: string, practitioner: any): Observable<any> {
+    return this.http.put(`/fhir/Practitioner/${id}`, practitioner);
+  }
+
+  deletePractitioner(id: string): Observable<any> {
+    return this.http.delete(`/fhir/Practitioner/${id}`);
+  }
 }
+
