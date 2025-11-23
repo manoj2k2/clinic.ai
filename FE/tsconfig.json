@@ -16,6 +16,7 @@
       "dom"
     ]
     ,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "experimentalDecorators": true
   }
 }
