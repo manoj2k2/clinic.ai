@@ -43,6 +43,7 @@ import { FhirService } from '../services/fhir.service';
         <button type="submit">Save</button>
         <button type="button" (click)="cancel()">Cancel</button>
         <button *ngIf="!isNew" type="button" (click)="remove()" class="danger">Delete</button>
+        <button *ngIf="!isNew" type="button" (click)="viewObservations()">Observations</button>
       </div>
     </form>
   </div>
@@ -71,7 +72,7 @@ export class PatientEditorComponent implements OnInit {
   birthDate = '';
   gender = '';
 
-  constructor(private route: ActivatedRoute, private router: Router, private fhir: FhirService) {}
+  constructor(private route: ActivatedRoute, private router: Router, private fhir: FhirService) { }
 
   ngOnInit(): void {
     this.id = this.route.snapshot.paramMap.get('id');
@@ -120,5 +121,11 @@ export class PatientEditorComponent implements OnInit {
 
   cancel() {
     this.router.navigate(['/patients']);
+  }
+
+  viewObservations() {
+    if (this.id) {
+      this.router.navigate(['/patients', this.id, 'observations']);
+    }
   }
 }

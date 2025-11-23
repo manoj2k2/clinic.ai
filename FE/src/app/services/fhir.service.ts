@@ -51,5 +51,14 @@ export class FhirService {
   deletePractitioner(id: string): Observable<any> {
     return this.http.delete(`/fhir/Practitioner/${id}`);
   }
+
+  // Observation
+  createObservation(observation: any): Observable<any> {
+    return this.http.post(`/fhir/Observation`, observation);
+  }
+
+  getObservationsForPatient(patientId: string): Observable<any> {
+    return this.http.get(`/fhir/Observation?subject=Patient/${patientId}&_sort=-date`);
+  }
 }
 
