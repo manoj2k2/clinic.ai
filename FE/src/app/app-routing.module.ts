@@ -4,7 +4,7 @@ import { PatientListComponent } from './patient/patient-list.component';
 import { PatientEditorComponent } from './patient/patient-editor.component';
 
 const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: 'patients' },
+  // { path: '', pathMatch: 'full', redirectTo: 'patients' },
   { path: 'patients', component: PatientListComponent },
   { path: 'patients/new', component: PatientEditorComponent },
   { path: 'patients/:id', component: PatientEditorComponent }

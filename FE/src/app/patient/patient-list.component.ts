@@ -8,7 +8,7 @@ import { FhirService } from '../services/fhir.service';
     <div style="display:flex; align-items:center; gap:12px;">
       <h3 style="margin:0">Patients / Appointments</h3>
       <div style="margin-left:auto">
-        <a routerLink="/patients/new"><button>Create New Patient</button></a>
+        <button type="button" routerLink="/patients/new">Create New Patient</button>
       </div>
     </div>
     <div *ngIf="loading" class="loading">Loading...</div>
@@ -19,7 +19,7 @@ import { FhirService } from '../services/fhir.service';
         <div class="patient-row">
           <div class="patient-name">{{p.resource?.name?.[0]?.text || (p.resource?.name?.[0]?.given?.join(' ') + ' ' + p.resource?.name?.[0]?.family) || p.resource?.id}}</div>
           <div style="display:flex; gap:8px; align-items:center">
-            <a [routerLink]="['/patients', p.resource?.id]"><button>Edit</button></a>
+            <button type="button" [routerLink]="['/patients', p.resource?.id]">Edit</button>
             <div class="patient-id">ID: {{p.resource?.id}}</div>
           </div>
         </div>
