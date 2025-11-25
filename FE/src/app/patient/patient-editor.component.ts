@@ -109,6 +109,7 @@ export class PatientEditorComponent implements OnInit {
     if (this.isNew) {
       this.fhir.createPatient(patient).subscribe({ next: () => this.router.navigate(['/patients']), error: (e) => this.error = e.message || 'Create failed' });
     } else if (this.id) {
+      patient.id = this.id; // Add id for update operation
       this.fhir.updatePatient(this.id, patient).subscribe({ next: () => this.router.navigate(['/patients']), error: (e) => this.error = e.message || 'Update failed' });
     }
   }

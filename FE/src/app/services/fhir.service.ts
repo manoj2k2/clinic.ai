@@ -8,7 +8,7 @@ export class FhirService {
 
   getPatients(): Observable<any> {
     // Proxy will forward /fhir to the HAPI server at localhost:8082
-    return this.http.get('/fhir/Patient?gender=male');
+    return this.http.get('/fhir/Patient');
   }
 
   getAppointmentsForPatient(patientId: string): Observable<any> {
@@ -145,6 +145,44 @@ export class FhirService {
 
   deleteInvoice(id: string): Observable<any> {
     return this.http.delete(`/fhir/Invoice/${id}`);
+  }
+
+  // Standalone Observation CRUD (general observations, not patient-specific)
+  getObservations(): Observable<any> {
+    return this.http.get('/fhir/Observation');
+  }
+
+  getObservation(id: string): Observable<any> {
+    return this.http.get(`/fhir/Observation/${id}`);
+  }
+
+  updateObservation(id: string, observation: any): Observable<any> {
+    return this.http.put(`/fhir/Observation/${id}`, observation);
+  }
+
+  deleteObservation(id: string): Observable<any> {
+    return this.http.delete(`/fhir/Observation/${id}`);
+  }
+
+  // Appointment CRUD
+  getAppointments(): Observable<any> {
+    return this.http.get('/fhir/Appointment');
+  }
+
+  getAppointment(id: string): Observable<any> {
+    return this.http.get(`/fhir/Appointment/${id}`);
+  }
+
+  createAppointment(appointment: any): Observable<any> {
+    return this.http.post(`/fhir/Appointment`, appointment);
+  }
+
+  updateAppointment(id: string, appointment: any): Observable<any> {
+    return this.http.put(`/fhir/Appointment/${id}`, appointment);
+  }
+
+  deleteAppointment(id: string): Observable<any> {
+    return this.http.delete(`/fhir/Appointment/${id}`);
   }
 }
 
