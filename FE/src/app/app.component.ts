@@ -3,8 +3,14 @@ import { AuthService } from './services/auth.service';
 
 @Component({
   selector: 'app-root',
-  templateUrl: './app.component.html' 
+  templateUrl: './app.component.html'
 })
 export class AppComponent {
-  constructor(public auth: AuthService) {}
+  mobileMenuOpen = false;
+
+  constructor(public auth: AuthService) { }
+
+  toggleMobileMenu() {
+    this.mobileMenuOpen = !this.mobileMenuOpen;
+  }
 }

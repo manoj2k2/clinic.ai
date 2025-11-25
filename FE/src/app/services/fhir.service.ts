@@ -184,6 +184,27 @@ export class FhirService {
   deleteAppointment(id: string): Observable<any> {
     return this.http.delete(`/fhir/Appointment/${id}`);
   }
+
+  // MedicationRequest
+  getMedicationRequests(): Observable<any> {
+    return this.http.get('/fhir/MedicationRequest');
+  }
+
+  getMedicationRequest(id: string): Observable<any> {
+    return this.http.get(`/fhir/MedicationRequest/${id}`);
+  }
+
+  createMedicationRequest(medicationRequest: any): Observable<any> {
+    return this.http.post('/fhir/MedicationRequest', medicationRequest);
+  }
+
+  updateMedicationRequest(id: string, medicationRequest: any): Observable<any> {
+    return this.http.put(`/fhir/MedicationRequest/${id}`, medicationRequest);
+  }
+
+  deleteMedicationRequest(id: string): Observable<any> {
+    return this.http.delete(`/fhir/MedicationRequest/${id}`);
+  }
 }
 
 

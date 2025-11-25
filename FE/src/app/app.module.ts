@@ -14,12 +14,13 @@ import { DiagnosticReportModule } from './diagnostic-report/diagnostic-report.mo
 import { InvoiceModule } from './invoice/invoice.module';
 import { ObservationModule } from './observation/observation.module';
 import { AppointmentModule } from './appointment/appointment.module';
+import { MedicationRequestModule } from './medication-request/medication-request.module';
 import { AuthService } from './services/auth.service';
 import { FhirService } from './services/fhir.service';
 
 @NgModule({
   declarations: [AppComponent],
-  imports: [BrowserModule, HttpClientModule, FormsModule, AppRoutingModule, PatientModule, PractitionerModule, ConsentModule, OrganizationModule, DiagnosticReportModule, InvoiceModule, ObservationModule, AppointmentModule, OAuthModule.forRoot()],
+  imports: [BrowserModule, HttpClientModule, FormsModule, AppRoutingModule, PatientModule, PractitionerModule, ConsentModule, OrganizationModule, DiagnosticReportModule, InvoiceModule, ObservationModule, AppointmentModule, MedicationRequestModule, OAuthModule.forRoot()],
   providers: [AuthService, FhirService],
   bootstrap: [AppComponent]
 

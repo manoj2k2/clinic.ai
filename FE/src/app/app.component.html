@@ -6,7 +6,8 @@
         <h1>Clinic.AI</h1>
       </div>
 
-      <nav class="main-nav">
+      <!-- Desktop Navigation -->
+      <nav class="main-nav desktop-nav">
         <a routerLink="/patients" routerLinkActive="active">Patients</a>
         <a routerLink="/appointments" routerLinkActive="active">Appointments</a>
         <a routerLink="/practitioners" routerLinkActive="active">Practitioners</a>
@@ -15,13 +16,74 @@
         <a routerLink="/organizations" routerLinkActive="active">Organizations</a>
         <a routerLink="/diagnostic-reports" routerLinkActive="active">Reports</a>
         <a routerLink="/invoices" routerLinkActive="active">Invoices</a>
+        <a routerLink="/medication-requests" routerLinkActive="active">Medication Requests</a>
       </nav>
 
-      <div class="user-actions">
+      <div class="user-actions desktop-actions">
         <button *ngIf="!auth.isLoggedIn()" (click)="auth.login()" class="btn btn-sm btn-primary">Login</button>
         <button *ngIf="auth.isLoggedIn()" (click)="auth.logout()" class="btn btn-sm btn-outline">Logout</button>
       </div>
+
+      <!-- Mobile Menu Button -->
+      <button class="mobile-menu-btn" (click)="toggleMobileMenu()">
+        <i class="pi pi-bars"></i>
+      </button>
     </div>
+
+    <!-- Mobile Navigation Overlay -->
+    <div class="mobile-nav-overlay" [class.active]="mobileMenuOpen" (click)="toggleMobileMenu()"></div>
+    <nav class="mobile-nav" [class.active]="mobileMenuOpen">
+      <div class="mobile-nav-header">
+        <h2>Menu</h2>
+        <button class="close-btn" (click)="toggleMobileMenu()">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+      <div class="mobile-nav-links">
+        <a routerLink="/patients" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <i class="pi pi-users"></i>
+          <span>Patients</span>
+        </a>
+        <a routerLink="/appointments" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <i class="pi pi-calendar"></i>
+          <span>Appointments</span>
+        </a>
+        <a routerLink="/practitioners" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <i class="pi pi-user-plus"></i>
+          <span>Practitioners</span>
+        </a>
+        <a routerLink="/observations" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <i class="pi pi-chart-line"></i>
+          <span>Observations</span>
+        </a>
+        <a routerLink="/consents" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <i class="pi pi-check-circle"></i>
+          <span>Consents</span>
+        </a>
+        <a routerLink="/organizations" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <i class="pi pi-building"></i>
+          <span>Organizations</span>
+        </a>
+        <a routerLink="/diagnostic-reports" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <i class="pi pi-file"></i>
+          <span>Reports</span>
+        </a>
+        <a routerLink="/invoices" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <i class="pi pi-dollar"></i>
+          <span>Invoices</span>
+        </a>
+        <a routerLink="/medication-requests" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <i class="pi pi-prescription"></i>
+          <span>Medication Requests</span>
+        </a>
+      </div>
+      <div class="mobile-nav-footer">
+        <button *ngIf="!auth.isLoggedIn()" (click)="auth.login(); toggleMobileMenu()"
+          class="btn btn-primary">Login</button>
+        <button *ngIf="auth.isLoggedIn()" (click)="auth.logout(); toggleMobileMenu()"
+          class="btn btn-outline">Logout</button>
+      </div>
+    </nav>
   </header>
 
   <main class="main-content">
@@ -42,23 +104,25 @@
     padding: 0 var(--spacing-lg);
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 1000;
     box-shadow: var(--shadow-sm);
   }
 
   .header-content {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
     height: 64px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: var(--spacing-md);
   }
 
   .brand {
     display: flex;
     align-items: center;
     gap: 12px;
+    flex-shrink: 0;
   }
 
   .brand h1 {
@@ -66,15 +130,24 @@
     font-weight: 700;
     color: var(--text-main);
     letter-spacing: -0.02em;
+    margin: 0;
   }
 
-  .main-nav {
+  .desktop-nav {
     display: flex;
-    gap: 24px;
+    gap: 20px;
     height: 100%;
+    flex: 1;
+    justify-content: center;
+    overflow-x: auto;
+    scrollbar-width: none;
   }
 
-  .main-nav a {
+  .desktop-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .desktop-nav a {
     display: flex;
     align-items: center;
     text-decoration: none;
@@ -84,19 +157,195 @@
     border-bottom: 2px solid transparent;
     transition: all 0.2s;
     height: 100%;
+    white-space: nowrap;
+    padding: 0 4px;
   }
 
-  .main-nav a:hover {
+  .desktop-nav a:hover {
     color: var(--primary-color);
   }
 
-  .main-nav a.active {
+  .desktop-nav a.active {
     color: var(--primary-color);
     border-bottom-color: var(--primary-color);
+  }
+
+  .desktop-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-shrink: 0;
+  }
+
+  .mobile-menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--text-main);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: var(--radius-md);
+    transition: background-color 0.2s;
+  }
+
+  .mobile-menu-btn:hover {
+    background-color: var(--neutral-bg);
+  }
+
+  .mobile-nav-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .mobile-nav-overlay.active {
+    opacity: 1;
+  }
+
+  .mobile-nav {
+    display: none;
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 280px;
+    max-width: 80vw;
+    height: 100vh;
+    background: white;
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+    z-index: 1001;
+    transition: right 0.3s ease-in-out;
+    flex-direction: column;
+  }
+
+  .mobile-nav.active {
+    right: 0;
+  }
+
+  .mobile-nav-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .mobile-nav-header h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--text-main);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: var(--radius-md);
+    transition: background-color 0.2s;
+  }
+
+  .close-btn:hover {
+    background-color: var(--neutral-bg);
+  }
+
+  .mobile-nav-links {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--spacing-md) 0;
+  }
+
+  .mobile-nav-links a {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+    text-decoration: none;
+    color: var(--text-main);
+    font-weight: 500;
+    transition: background-color 0.2s;
+  }
+
+  .mobile-nav-links a:hover {
+    background-color: var(--neutral-bg);
+  }
+
+  .mobile-nav-links a.active {
+    background-color: rgba(49, 130, 206, 0.1);
+    color: var(--primary-color);
+    border-left: 3px solid var(--primary-color);
+  }
+
+  .mobile-nav-links a i {
+    font-size: 18px;
+    width: 24px;
+  }
+
+  .mobile-nav-footer {
+    padding: var(--spacing-lg);
+    border-top: 1px solid var(--border-color);
+  }
+
+  .mobile-nav-footer .btn {
+    width: 100%;
   }
 
   .main-content {
     flex: 1;
     background-color: var(--bg-main);
+  }
+
+  /* Responsive Breakpoints */
+  @media (max-width: 1024px) {
+    .desktop-nav {
+      gap: 12px;
+    }
+
+    .desktop-nav a {
+      font-size: 13px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .main-header {
+      padding: 0 var(--spacing-md);
+    }
+
+    .desktop-nav,
+    .desktop-actions {
+      display: none;
+    }
+
+    .mobile-menu-btn,
+    .mobile-nav,
+    .mobile-nav-overlay {
+      display: flex;
+    }
+
+    .brand h1 {
+      font-size: 18px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .main-header {
+      padding: 0 var(--spacing-sm);
+    }
+
+    .brand i {
+      font-size: 1.2rem !important;
+    }
+
+    .brand h1 {
+      font-size: 16px;
+    }
   }
 </style>

@@ -17,7 +17,8 @@ import { InvoiceEditorComponent } from './invoice/invoice-editor.component';
 import { ObservationListComponent } from './observation/observation-list.component';
 import { ObservationEditorComponent } from './observation/observation-editor.component';
 import { AppointmentListComponent } from './appointment/appointment-list.component';
-import { AppointmentEditorComponent } from './appointment/appointment-editor.component';
+import { MedicationRequestListComponent } from './medication-request/medication-request-list.component';
+import { MedicationRequestEditorComponent } from './medication-request/medication-request-editor.component';
 
 const routes: Routes = [
   // { path: '', pathMatch: 'full', redirectTo: 'patients' },
@@ -44,9 +45,9 @@ const routes: Routes = [
   , { path: 'observations', component: ObservationListComponent }
   , { path: 'observations/new', component: ObservationEditorComponent }
   , { path: 'observations/:id', component: ObservationEditorComponent }
-  , { path: 'appointments', component: AppointmentListComponent }
-  , { path: 'appointments/new', component: AppointmentEditorComponent }
-  , { path: 'appointments/:id', component: AppointmentEditorComponent }
+  , { path: 'medication-requests', component: MedicationRequestListComponent }
+  , { path: 'medication-requests/new', component: MedicationRequestEditorComponent }
+  , { path: 'medication-requests/:id', component: MedicationRequestEditorComponent }
 ];
 
 @NgModule({
