@@ -11,12 +11,13 @@ import { PractitionerModule } from './practitioner/practitioner.module';
 import { ConsentModule } from './consent/consent.module';
 import { OrganizationModule } from './organization/organization.module';
 import { DiagnosticReportModule } from './diagnostic-report/diagnostic-report.module';
+import { InvoiceModule } from './invoice/invoice.module';
 import { AuthService } from './services/auth.service';
 import { FhirService } from './services/fhir.service';
 
 @NgModule({
   declarations: [AppComponent],
-  imports: [BrowserModule, HttpClientModule, FormsModule, AppRoutingModule, PatientModule, PractitionerModule, ConsentModule, OrganizationModule, DiagnosticReportModule, OAuthModule.forRoot()],
+  imports: [BrowserModule, HttpClientModule, FormsModule, AppRoutingModule, PatientModule, PractitionerModule, ConsentModule, OrganizationModule, DiagnosticReportModule, InvoiceModule, OAuthModule.forRoot()],
   providers: [AuthService, FhirService],
   bootstrap: [AppComponent]
 

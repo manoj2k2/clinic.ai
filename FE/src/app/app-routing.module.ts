@@ -12,6 +12,8 @@ import { OrganizationListComponent } from './organization/organization-list.comp
 import { OrganizationEditorComponent } from './organization/organization-editor.component';
 import { DiagnosticReportListComponent } from './diagnostic-report/diagnostic-report-list.component';
 import { DiagnosticReportEditorComponent } from './diagnostic-report/diagnostic-report-editor.component';
+import { InvoiceListComponent } from './invoice/invoice-list.component';
+import { InvoiceEditorComponent } from './invoice/invoice-editor.component';
 
 const routes: Routes = [
   // { path: '', pathMatch: 'full', redirectTo: 'patients' },
@@ -32,6 +34,9 @@ const routes: Routes = [
   , { path: 'diagnostic-reports', component: DiagnosticReportListComponent }
   , { path: 'diagnostic-reports/new', component: DiagnosticReportEditorComponent }
   , { path: 'diagnostic-reports/:id', component: DiagnosticReportEditorComponent }
+  , { path: 'invoices', component: InvoiceListComponent }
+  , { path: 'invoices/new', component: InvoiceEditorComponent }
+  , { path: 'invoices/:id', component: InvoiceEditorComponent }
 ];
 
 @NgModule({

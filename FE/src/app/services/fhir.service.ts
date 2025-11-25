@@ -125,6 +125,27 @@ export class FhirService {
   deleteDiagnosticReport(id: string): Observable<any> {
     return this.http.delete(`/fhir/DiagnosticReport/${id}`);
   }
+
+  // Invoice CRUD
+  getInvoices(): Observable<any> {
+    return this.http.get('/fhir/Invoice');
+  }
+
+  getInvoice(id: string): Observable<any> {
+    return this.http.get(`/fhir/Invoice/${id}`);
+  }
+
+  createInvoice(invoice: any): Observable<any> {
+    return this.http.post(`/fhir/Invoice`, invoice);
+  }
+
+  updateInvoice(id: string, invoice: any): Observable<any> {
+    return this.http.put(`/fhir/Invoice/${id}`, invoice);
+  }
+
+  deleteInvoice(id: string): Observable<any> {
+    return this.http.delete(`/fhir/Invoice/${id}`);
+  }
 }
 
 
