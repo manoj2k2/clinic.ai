@@ -8,6 +8,10 @@ import { PractitionerListComponent } from './practitioner/practitioner-list.comp
 import { PractitionerEditorComponent } from './practitioner/practitioner-editor.component';
 import { ConsentListComponent } from './consent/consent-list.component';
 import { ConsentEditorComponent } from './consent/consent-editor.component';
+import { OrganizationListComponent } from './organization/organization-list.component';
+import { OrganizationEditorComponent } from './organization/organization-editor.component';
+import { DiagnosticReportListComponent } from './diagnostic-report/diagnostic-report-list.component';
+import { DiagnosticReportEditorComponent } from './diagnostic-report/diagnostic-report-editor.component';
 
 const routes: Routes = [
   // { path: '', pathMatch: 'full', redirectTo: 'patients' },
@@ -22,6 +26,12 @@ const routes: Routes = [
   , { path: 'consents', component: ConsentListComponent }
   , { path: 'consents/new', component: ConsentEditorComponent }
   , { path: 'consents/:id', component: ConsentEditorComponent }
+  , { path: 'organizations', component: OrganizationListComponent }
+  , { path: 'organizations/new', component: OrganizationEditorComponent }
+  , { path: 'organizations/:id', component: OrganizationEditorComponent }
+  , { path: 'diagnostic-reports', component: DiagnosticReportListComponent }
+  , { path: 'diagnostic-reports/new', component: DiagnosticReportEditorComponent }
+  , { path: 'diagnostic-reports/:id', component: DiagnosticReportEditorComponent }
 ];
 
 @NgModule({

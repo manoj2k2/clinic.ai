@@ -6,7 +6,7 @@ import { FhirService } from '../services/fhir.service';
   template: `
   <div class="page-container">
     <div class="page-header">
-      <h3>Patients / Appointments</h3>
+      <h3>Patients</h3>
       <button type="button" routerLink="/patients/new" class="btn btn-primary">Create New Patient</button>
     </div>
 
