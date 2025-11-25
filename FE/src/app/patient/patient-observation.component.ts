@@ -5,55 +5,50 @@ import { FhirService } from '../services/fhir.service';
 @Component({
   selector: 'app-patient-observation',
   template: `
-  <div class="editor">
-    <h3>Record Observation</h3>
-
-    <div *ngIf="loading">Loading...</div>
-    <div *ngIf="error" class="error">{{error}}</div>
-
-    <form *ngIf="!loading" (ngSubmit)="save()">
-      <div class="field">
-        <label>Observation Type</label>
-        <select [(ngModel)]="code" name="code">
-          <option value="body-weight">Body Weight</option>
-          <option value="blood-pressure">Blood Pressure</option>
-          <option value="heart-rate">Heart Rate</option>
-          <option value="temperature">Body Temperature</option>
-        </select>
+  <div class="editor-container">
+    <div class="editor-card">
+      <div class="page-header">
+        <h2>Record Observation</h2>
       </div>
 
-      <div class="field">
-        <label>Value ({{codeMap[code]?.unit}})</label>
-        <div class="input-group">
-          <input type="text" [(ngModel)]="value" name="value" placeholder="e.g. 70" />
-          <span class="unit">{{codeMap[code]?.unit}}</span>
+      <div *ngIf="loading" class="loading">Loading...</div>
+      <div *ngIf="error" class="error-msg">{{error}}</div>
+
+      <form *ngIf="!loading" (ngSubmit)="save()">
+        <div class="form-section">
+          <div class="form-field">
+            <label>Observation Type</label>
+            <select [(ngModel)]="code" name="code">
+              <option value="body-weight">Body Weight</option>
+              <option value="blood-pressure">Blood Pressure</option>
+              <option value="heart-rate">Heart Rate</option>
+              <option value="temperature">Body Temperature</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label>Value ({{codeMap[code]?.unit}})</label>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <input type="text" [(ngModel)]="value" name="value" placeholder="e.g. 70" style="flex:1" />
+              <span style="font-weight: 600; color: var(--text-secondary);">{{codeMap[code]?.unit}}</span>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label>Date</label>
+            <input type="datetime-local" [(ngModel)]="date" name="date" />
+          </div>
         </div>
-      </div>
 
-      <div class="field">
-        <label>Date</label>
-        <input type="datetime-local" [(ngModel)]="date" name="date" />
-      </div>
-
-      <div class="actions">
-        <button type="submit">Save</button>
-        <button type="button" (click)="cancel()">Cancel</button>
-      </div>
-    </form>
+        <div class="actions" style="display:flex; justify-content:flex-end; gap:12px; margin-top:24px">
+          <button type="button" (click)="cancel()" class="btn btn-secondary">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
   </div>
   `,
-  styles: [
-    `
-    .editor { padding: 12px; max-width: 560px; }
-    .field { margin-bottom: 10px; }
-    label { display:block; font-weight:600; margin-bottom:4px }
-    input, select { width:100%; padding:6px 8px; box-sizing:border-box }
-    .actions { margin-top:12px; display:flex; gap:8px }
-    .error { color:#b00020 }
-    .input-group { display: flex; align-items: center; gap: 8px; }
-    .unit { font-weight: bold; color: #666; }
-    `
-  ]
+  styles: []
 })
 export class PatientObservationComponent implements OnInit {
   patientId: string | null = null;

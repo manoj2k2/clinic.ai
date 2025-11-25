@@ -5,44 +5,47 @@ import { FhirService } from '../services/fhir.service';
 @Component({
   selector: 'app-practitioner-editor',
   template: `
-  <div class="editor">
-    <h3 *ngIf="isNew">Create Practitioner</h3>
-    <h3 *ngIf="!isNew">Edit Practitioner</h3>
+  <div class="editor-container">
+    <div class="editor-card">
+      <div class="page-header">
+        <h2 *ngIf="isNew">Create Practitioner</h2>
+        <h2 *ngIf="!isNew">Edit Practitioner</h2>
+      </div>
 
-    <div *ngIf="loading">Loading...</div>
-    <div *ngIf="error" class="error">{{error}}</div>
+      <div *ngIf="loading" class="loading">Loading...</div>
+      <div *ngIf="error" class="error-msg">{{error}}</div>
 
-    <form *ngIf="!loading" (ngSubmit)="save()">
-      <div class="field">
-        <label>Given Names</label>
-        <input type="text" [(ngModel)]="nameGiven" name="given" />
-      </div>
-      <div class="field">
-        <label>Family Name</label>
-        <input type="text" [(ngModel)]="family" name="family" />
-      </div>
-      <div class="field">
-        <label>Qualification / Role</label>
-        <input type="text" [(ngModel)]="qualification" name="qualification" />
-      </div>
-      <div class="actions">
-        <button type="submit">Save</button>
-        <button type="button" (click)="cancel()">Cancel</button>
-        <button *ngIf="!isNew" type="button" (click)="remove()" class="danger">Delete</button>
-      </div>
-    </form>
+      <form *ngIf="!loading" (ngSubmit)="save()">
+        <div class="form-section">
+          <div class="form-section-title">Professional Information</div>
+          
+          <div class="form-row">
+            <div class="form-field">
+              <label>Given Names</label>
+              <input type="text" [(ngModel)]="nameGiven" name="given" placeholder="e.g. Sarah" />
+            </div>
+            <div class="form-field">
+              <label>Family Name</label>
+              <input type="text" [(ngModel)]="family" name="family" placeholder="e.g. Smith" />
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label>Qualification</label>
+            <input type="text" [(ngModel)]="qualification" name="qualification" placeholder="e.g. MD, Cardiologist" />
+          </div>
+        </div>
+
+        <div class="actions" style="display:flex; justify-content:flex-end; gap:12px; margin-top:24px">
+          <button type="button" (click)="cancel()" class="btn btn-secondary">Cancel</button>
+          <button *ngIf="!isNew" type="button" (click)="remove()" class="btn btn-danger">Delete</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
   </div>
   `,
-  styles: [
-    `
-    .editor { padding:12px; max-width:600px }
-    .field { margin-bottom:8px }
-    label { display:block; font-weight:600; margin-bottom:4px }
-    input { width:100%; padding:6px }
-    .actions { margin-top:10px; display:flex; gap:8px }
-    .danger { background:#b00020; color:white }
-    `
-  ]
+  styles: []
 })
 export class PractitionerEditorComponent implements OnInit {
   isNew = true;
@@ -54,19 +57,21 @@ export class PractitionerEditorComponent implements OnInit {
   family = '';
   qualification = '';
 
-  constructor(private route: ActivatedRoute, private router: Router, private fhir: FhirService) {}
+  constructor(private route: ActivatedRoute, private router: Router, private fhir: FhirService) { }
 
   ngOnInit(): void {
     this.id = this.route.snapshot.paramMap.get('id');
     if (this.id && this.id !== 'new') {
       this.isNew = false;
       this.loading = true;
-      this.fhir.getPractitioner(this.id).subscribe({ next: (res:any) => {
-        this.nameGiven = (res.name && res.name[0] && res.name[0].given) ? res.name[0].given.join(' ') : '';
-        this.family = (res.name && res.name[0] && res.name[0].family) ? res.name[0].family : '';
-        this.qualification = (res.qualification && res.qualification[0] && res.qualification[0].code && res.qualification[0].code.text) ? res.qualification[0].code.text : '';
-        this.loading = false;
-      }, error: (e) => { this.error = e.message || 'Failed to load practitioner'; this.loading = false; } });
+      this.fhir.getPractitioner(this.id).subscribe({
+        next: (res: any) => {
+          this.nameGiven = (res.name && res.name[0] && res.name[0].given) ? res.name[0].given.join(' ') : '';
+          this.family = (res.name && res.name[0] && res.name[0].family) ? res.name[0].family : '';
+          this.qualification = (res.qualification && res.qualification[0] && res.qualification[0].code) ? res.qualification[0].code.text || '' : '';
+          this.loading = false;
+        }, error: (e) => { this.error = e.message || 'Failed'; this.loading = false; }
+      });
     } else {
       this.isNew = true;
     }
@@ -76,7 +81,7 @@ export class PractitionerEditorComponent implements OnInit {
     const practitioner: any = {
       resourceType: 'Practitioner',
       name: [{ given: this.nameGiven ? this.nameGiven.split(/\s+/).filter(Boolean) : [], family: this.family }],
-      qualification: this.qualification ? [{ code: { text: this.qualification } }] : undefined
+      qualification: this.qualification ? [{ code: { text: this.qualification } }] : []
     };
 
     if (this.isNew) {

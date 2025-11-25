@@ -1,12 +1,97 @@
-<div class="header">
-  <h2>Clinic - Patient App</h2>
-  <div style="margin-left:auto">
-    <button *ngIf="!auth.isLoggedIn()" (click)="auth.login()">Login</button>
-    <button *ngIf="auth.isLoggedIn()" (click)="auth.logout()">Logout</button>
-  </div>
+<div class="app-layout">
+  <header class="main-header">
+    <div class="header-content">
+      <div class="brand">
+        <i class="pi pi-heart-fill" style="font-size: 1.5rem; color: var(--primary-color);"></i>
+        <h1>Clinic.AI</h1>
+      </div>
+      
+      <nav class="main-nav">
+        <a routerLink="/patients" routerLinkActive="active">Patients</a>
+        <a routerLink="/practitioners" routerLinkActive="active">Practitioners</a>
+        <a routerLink="/consents" routerLinkActive="active">Consents</a>
+      </nav>
+
+      <div class="user-actions">
+        <button *ngIf="!auth.isLoggedIn()" (click)="auth.login()" class="btn btn-sm btn-primary">Login</button>
+        <button *ngIf="auth.isLoggedIn()" (click)="auth.logout()" class="btn btn-sm btn-outline">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
 </div>
-<nav style="margin: 8px 0">
-  <a routerLink="/patients" style="margin-right:12px">Patients</a>
-  <a routerLink="/practitioners" style="margin-right:12px">Practitioners</a>
-</nav>
-<router-outlet></router-outlet>
+
+<style>
+  .app-layout {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .main-header {
+    background: white;
+    border-bottom: 1px solid var(--border-color);
+    padding: 0 var(--spacing-lg);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .brand h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-main);
+    letter-spacing: -0.02em;
+  }
+
+  .main-nav {
+    display: flex;
+    gap: 24px;
+    height: 100%;
+  }
+
+  .main-nav a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 14px;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    height: 100%;
+  }
+
+  .main-nav a:hover {
+    color: var(--primary-color);
+  }
+
+  .main-nav a.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+  }
+
+  .main-content {
+    flex: 1;
+    background-color: var(--bg-main);
+  }
+</style>

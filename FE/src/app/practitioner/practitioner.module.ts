@@ -9,5 +9,5 @@ import { PractitionerEditorComponent } from './practitioner-editor.component';
   declarations: [PractitionerListComponent, PractitionerEditorComponent],
   imports: [CommonModule, FormsModule, RouterModule],
   exports: [PractitionerListComponent, PractitionerEditorComponent]
-})
+})  
 export class PractitionerModule {}

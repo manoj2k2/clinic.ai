@@ -31,6 +31,7 @@ export class FhirService {
     return this.http.delete(`/fhir/Patient/${id}`);
   }
 
+
   // Practitioner CRUD
   getPractitioners(): Observable<any> {
     return this.http.get('/fhir/Practitioner');
@@ -52,6 +53,7 @@ export class FhirService {
     return this.http.delete(`/fhir/Practitioner/${id}`);
   }
 
+
   // Observation
   createObservation(observation: any): Observable<any> {
     return this.http.post(`/fhir/Observation`, observation);
@@ -59,6 +61,27 @@ export class FhirService {
 
   getObservationsForPatient(patientId: string): Observable<any> {
     return this.http.get(`/fhir/Observation?subject=Patient/${patientId}&_sort=-date`);
+  }
+
+  // Consent CRUD
+  getConsents(): Observable<any> {
+    return this.http.get('/fhir/Consent');
+  }
+
+  getConsent(id: string): Observable<any> {
+    return this.http.get(`/fhir/Consent/${id}`);
+  }
+
+  createConsent(consent: any): Observable<any> {
+    return this.http.post(`/fhir/Consent`, consent);
+  }
+
+  updateConsent(id: string, consent: any): Observable<any> {
+    return this.http.put(`/fhir/Consent/${id}`, consent);
+  }
+
+  deleteConsent(id: string): Observable<any> {
+    return this.http.delete(`/fhir/Consent/${id}`);
   }
 }
 

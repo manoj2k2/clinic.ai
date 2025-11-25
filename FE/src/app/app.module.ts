@@ -8,12 +8,13 @@ import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { PatientModule } from './patient/patient.module';
 import { PractitionerModule } from './practitioner/practitioner.module';
+import { ConsentModule } from './consent/consent.module';
 import { AuthService } from './services/auth.service';
 import { FhirService } from './services/fhir.service';
 
 @NgModule({
   declarations: [AppComponent],
-  imports: [BrowserModule, HttpClientModule, FormsModule, AppRoutingModule, PatientModule, PractitionerModule, OAuthModule.forRoot()],
+  imports: [BrowserModule, HttpClientModule, FormsModule, AppRoutingModule, PatientModule, PractitionerModule, ConsentModule, OAuthModule.forRoot()],
   providers: [AuthService, FhirService],
   bootstrap: [AppComponent]
   
