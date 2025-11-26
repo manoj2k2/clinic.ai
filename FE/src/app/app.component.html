@@ -16,6 +16,7 @@
         <a routerLink="/organizations" routerLinkActive="active">Organizations</a>
         <a routerLink="/diagnostic-reports" routerLinkActive="active">Reports</a>
         <a routerLink="/invoices" routerLinkActive="active">Invoices</a>
+        <a routerLink="/coverages" routerLinkActive="active">Coverages</a>
         <a routerLink="/medication-requests" routerLinkActive="active">Medication Requests</a>
       </nav>
 
@@ -71,6 +72,10 @@
         <a routerLink="/invoices" routerLinkActive="active" (click)="toggleMobileMenu()">
           <i class="pi pi-dollar"></i>
           <span>Invoices</span>
+        </a>
+        <a routerLink="/coverages" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <i class="pi pi-check"></i>
+          <span>Coverages</span>
         </a>
         <a routerLink="/medication-requests" routerLinkActive="active" (click)="toggleMobileMenu()">
           <i class="pi pi-prescription"></i>

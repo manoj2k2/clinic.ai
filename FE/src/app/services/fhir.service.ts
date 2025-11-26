@@ -205,6 +205,27 @@ export class FhirService {
   deleteMedicationRequest(id: string): Observable<any> {
     return this.http.delete(`/fhir/MedicationRequest/${id}`);
   }
+
+  // Coverage CRUD
+  getCoverages(): Observable<any> {
+    return this.http.get('/fhir/Coverage');
+  }
+
+  getCoverage(id: string): Observable<any> {
+    return this.http.get(`/fhir/Coverage/${id}`);
+  }
+
+  createCoverage(coverage: any): Observable<any> {
+    return this.http.post('/fhir/Coverage', coverage);
+  }
+
+  updateCoverage(id: string, coverage: any): Observable<any> {
+    return this.http.put(`/fhir/Coverage/${id}`, coverage);
+  }
+
+  deleteCoverage(id: string): Observable<any> {
+    return this.http.delete(`/fhir/Coverage/${id}`);
+  }
 }
 
 

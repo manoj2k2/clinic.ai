@@ -19,6 +19,8 @@ import { ObservationEditorComponent } from './observation/observation-editor.com
 import { AppointmentListComponent } from './appointment/appointment-list.component';
 import { MedicationRequestListComponent } from './medication-request/medication-request-list.component';
 import { MedicationRequestEditorComponent } from './medication-request/medication-request-editor.component';
+import { CoverageListComponent } from './coverage/coverage-list.component';
+import { CoverageEditorComponent } from './coverage/coverage-editor.component';
 
 const routes: Routes = [
   // { path: '', pathMatch: 'full', redirectTo: 'patients' },
@@ -48,6 +50,9 @@ const routes: Routes = [
   , { path: 'medication-requests', component: MedicationRequestListComponent }
   , { path: 'medication-requests/new', component: MedicationRequestEditorComponent }
   , { path: 'medication-requests/:id', component: MedicationRequestEditorComponent }
+  , { path: 'coverages', component: CoverageListComponent }
+  , { path: 'coverages/new', component: CoverageEditorComponent }
+  , { path: 'coverages/:id', component: CoverageEditorComponent }
 ];
 
 @NgModule({
