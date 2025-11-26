@@ -21,9 +21,13 @@ import { MedicationRequestListComponent } from './medication-request/medication-
 import { MedicationRequestEditorComponent } from './medication-request/medication-request-editor.component';
 import { CoverageListComponent } from './coverage/coverage-list.component';
 import { CoverageEditorComponent } from './coverage/coverage-editor.component';
+import { practitionerPortalDashboardComponent } from './practitioner-portal/practitioner-portal.component';
+import { PatientPortalComponent } from './patient-portal/patient-portal.component';
 
 const routes: Routes = [
-  // { path: '', pathMatch: 'full', redirectTo: 'patients' },
+  { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+  { path: 'practitioner-portal', component: practitionerPortalDashboardComponent },
+  { path: 'patient-portal', component: PatientPortalComponent },
   { path: 'patients', component: PatientListComponent },
   { path: 'patients/new', component: PatientEditorComponent },
   { path: 'patients/:id/observations', component: PatientObservationListComponent },

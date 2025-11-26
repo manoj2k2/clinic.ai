@@ -110,6 +110,10 @@ export class FhirService {
     return this.http.get('/fhir/DiagnosticReport');
   }
 
+  getDiagnosticReportsForPatient(patientId: string): Observable<any> {
+    return this.http.get(`/fhir/DiagnosticReport?subject=Patient/${patientId}&_sort=-date`);
+  }
+
   getDiagnosticReport(id: string): Observable<any> {
     return this.http.get(`/fhir/DiagnosticReport/${id}`);
   }

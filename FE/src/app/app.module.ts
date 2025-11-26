@@ -18,9 +18,11 @@ import { MedicationRequestModule } from './medication-request/medication-request
 import { CoverageModule } from './coverage/coverage.module';
 import { AuthService } from './services/auth.service';
 import { FhirService } from './services/fhir.service';
+import { practitionerPortalDashboardComponent } from './practitioner-portal/practitioner-portal.component';
+import { PatientPortalComponent } from './patient-portal/patient-portal.component';
 
 @NgModule({
-  declarations: [AppComponent],
+  declarations: [AppComponent, practitionerPortalDashboardComponent, PatientPortalComponent],
   imports: [BrowserModule, HttpClientModule, FormsModule, AppRoutingModule, PatientModule, PractitionerModule, ConsentModule, OrganizationModule, DiagnosticReportModule, InvoiceModule, ObservationModule, AppointmentModule, MedicationRequestModule, CoverageModule, OAuthModule.forRoot()],
   providers: [AuthService, FhirService],
   bootstrap: [AppComponent]

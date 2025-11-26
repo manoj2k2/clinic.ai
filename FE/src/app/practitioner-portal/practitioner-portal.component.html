@@ -1,0 +1,316 @@
+<div class="page-container">
+    <div class="page-header">
+        <h3>Doctor Dashboard</h3>
+        <span class="text-secondary">Welcome back, Dr. Smith</span>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid-3">
+        <div class="stat-card">
+            <div class="stat-icon bg-blue">
+                <i class="pi pi-users"></i>
+            </div>
+            <div class="stat-content">
+                <span class="stat-label">Total Patients</span>
+                <span class="stat-value">{{ stats.patients }}</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon bg-green">
+                <i class="pi pi-calendar"></i>
+            </div>
+            <div class="stat-content">
+                <span class="stat-label">Appointments</span>
+                <span class="stat-value">{{ stats.appointments }}</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon bg-purple">
+                <i class="pi pi-user-plus"></i>
+            </div>
+            <div class="stat-content">
+                <span class="stat-label">Practitioners</span>
+                <span class="stat-value">{{ stats.practitioners }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="dashboard-grid">
+        <!-- Upcoming Appointments -->
+        <div class="content-card">
+            <div class="card-header-flex">
+                <h4>Upcoming Appointments</h4>
+                <a routerLink="/appointments" class="link-sm">View All</a>
+            </div>
+
+            <div *ngIf="loading" class="loading-sm">Loading...</div>
+
+            <div *ngIf="!loading && upcomingAppointments.length === 0" class="empty-state-sm">
+                No upcoming appointments today.
+            </div>
+
+            <div class="appointment-list">
+                <div *ngFor="let apt of upcomingAppointments" class="apt-item">
+                    <div class="apt-time">
+                        <span class="time">{{ apt.start | date:'shortTime' }}</span>
+                        <span class="date">{{ apt.start | date:'MMM d' }}</span>
+                    </div>
+                    <div class="apt-details">
+                        <span class="patient-name">Patient ID: {{
+                            apt.participant?.[0]?.actor?.reference?.split('/')?.[1] || 'Unknown' }}</span>
+                        <span class="apt-type">{{ apt.description || 'General Checkup' }}</span>
+                    </div>
+                    <div class="apt-status" [class]="apt.status">
+                        {{ apt.status }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="content-card">
+            <h4>Quick Actions</h4>
+            <div class="action-grid">
+                <button routerLink="/patients/new" class="action-btn">
+                    <i class="pi pi-user-plus"></i>
+                    <span>New Patient</span>
+                </button>
+                <button routerLink="/appointments" class="action-btn">
+                    <i class="pi pi-calendar-plus"></i>
+                    <span>Book Visit</span>
+                </button>
+                <button routerLink="/observations/new" class="action-btn">
+                    <i class="pi pi-heart"></i>
+                    <span>Record Vitals</span>
+                </button>
+                <button routerLink="/diagnostic-reports/new" class="action-btn">
+                    <i class="pi pi-file"></i>
+                    <span>Lab Report</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 24px;
+        margin-bottom: 32px;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 24px;
+        border-radius: 12px;
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        border: 1px solid var(--border-color);
+    }
+
+    .stat-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .stat-icon i {
+        font-size: 24px;
+        color: white;
+    }
+
+    .bg-blue {
+        background: linear-gradient(135deg, #3182ce, #2b6cb0);
+    }
+
+    .bg-green {
+        background: linear-gradient(135deg, #38a169, #2f855a);
+    }
+
+    .bg-purple {
+        background: linear-gradient(135deg, #805ad5, #6b46c1);
+    }
+
+    .stat-content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .stat-value {
+        color: var(--text-main);
+        font-size: 28px;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 24px;
+    }
+
+    .content-card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .card-header-flex {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .card-header-flex h4,
+    .content-card h4 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .link-sm {
+        font-size: 14px;
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .appointment-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .apt-item {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 12px;
+        border-radius: 8px;
+        background-color: var(--bg-main);
+        transition: transform 0.2s;
+    }
+
+    .apt-item:hover {
+        transform: translateX(4px);
+    }
+
+    .apt-time {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 60px;
+        padding-right: 16px;
+        border-right: 1px solid var(--border-color);
+    }
+
+    .apt-time .time {
+        font-weight: 700;
+        color: var(--text-main);
+    }
+
+    .apt-time .date {
+        font-size: 12px;
+        color: var(--text-secondary);
+    }
+
+    .apt-details {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .patient-name {
+        font-weight: 600;
+        color: var(--text-main);
+    }
+
+    .apt-type {
+        font-size: 13px;
+        color: var(--text-secondary);
+    }
+
+    .apt-status {
+        font-size: 12px;
+        padding: 4px 8px;
+        border-radius: 12px;
+        text-transform: capitalize;
+        font-weight: 500;
+    }
+
+    .apt-status.booked {
+        background: #ebf8ff;
+        color: #2b6cb0;
+    }
+
+    .apt-status.arrived {
+        background: #f0fff4;
+        color: #2f855a;
+    }
+
+    .apt-status.cancelled {
+        background: #fff5f5;
+        color: #c53030;
+    }
+
+    .action-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-top: 20px;
+    }
+
+    .action-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 20px;
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .action-btn:hover {
+        border-color: var(--primary-color);
+        background-color: #ebf8ff;
+        color: var(--primary-color);
+    }
+
+    .action-btn i {
+        font-size: 24px;
+        color: var(--primary-color);
+    }
+
+    .action-btn span {
+        font-weight: 500;
+        font-size: 14px;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
