@@ -6,5 +6,11 @@ import { AuthService } from './services/auth.service';
   templateUrl: './app.component.html'
 })
 export class AppComponent {
-  constructor(public auth: AuthService) {}
+  mobileMenuOpen = false;
+
+  constructor(public auth: AuthService) { }
+
+  toggleMobileMenu() {
+    this.mobileMenuOpen = !this.mobileMenuOpen;
+  }
 }

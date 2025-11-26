@@ -1,0 +1,241 @@
+<div class="page-container">
+    <div class="page-header">
+        <h3>Patient Portal</h3>
+        <span class="text-secondary" *ngIf="patient">Welcome, {{ patient.name?.[0]?.given?.[0] }} {{
+            patient.name?.[0]?.family }}</span>
+    </div>
+
+    <div *ngIf="loading" class="loading">Loading your profile...</div>
+    <div *ngIf="error" class="error-msg">{{ error }}</div>
+
+    <div *ngIf="!loading && patient" class="portal-grid">
+
+        <!-- My Appointments -->
+        <div class="content-card">
+            <div class="card-header-flex">
+                <h4>My Appointments</h4>
+                <button routerLink="/appointments" class="btn btn-sm btn-primary">
+                    <i class="pi pi-plus"></i> Book Visit
+                </button>
+            </div>
+
+            <div *ngIf="appointments.length === 0" class="empty-state-sm">
+                You have no upcoming appointments.
+            </div>
+
+            <div class="appointment-list">
+                <div *ngFor="let apt of appointments" class="apt-item">
+                    <div class="apt-date-box">
+                        <span class="day">{{ apt.start | date:'d' }}</span>
+                        <span class="month">{{ apt.start | date:'MMM' }}</span>
+                    </div>
+                    <div class="apt-info">
+                        <span class="apt-time">{{ apt.start | date:'shortTime' }}</span>
+                        <span class="apt-desc">{{ apt.description || 'Consultation' }}</span>
+                        <span class="apt-status" [class]="apt.status">{{ apt.status }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- My Results -->
+        <div class="content-card">
+            <div class="card-header-flex">
+                <h4>My Results</h4>
+            </div>
+
+            <div *ngIf="results.length === 0" class="empty-state-sm">
+                No lab results available.
+            </div>
+
+            <div class="results-list">
+                <div *ngFor="let res of results" class="result-item">
+                    <div class="result-icon">
+                        <i class="pi pi-file"></i>
+                    </div>
+                    <div class="result-info">
+                        <span class="result-title">{{ res.code?.text || 'Lab Report' }}</span>
+                        <span class="result-date">{{ res.effectiveDateTime | date:'mediumDate' }}</span>
+                    </div>
+                    <div class="result-action">
+                        <span class="status-badge" [class]="res.status">{{ res.status }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .portal-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 24px;
+    }
+
+    .content-card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .card-header-flex {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .card-header-flex h4 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    /* Appointment Styles */
+    .appointment-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .apt-item {
+        display: flex;
+        gap: 16px;
+        padding: 12px;
+        border-radius: 8px;
+        background: var(--bg-main);
+        border: 1px solid transparent;
+        transition: all 0.2s;
+    }
+
+    .apt-item:hover {
+        border-color: var(--primary-color);
+        background: white;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .apt-date-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        width: 60px;
+        height: 60px;
+        flex-shrink: 0;
+    }
+
+    .apt-date-box .day {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--primary-color);
+        line-height: 1;
+    }
+
+    .apt-date-box .month {
+        font-size: 12px;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        font-weight: 600;
+    }
+
+    .apt-info {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 4px;
+    }
+
+    .apt-time {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-main);
+    }
+
+    .apt-desc {
+        font-size: 13px;
+        color: var(--text-secondary);
+    }
+
+    .apt-status {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .apt-status.booked {
+        color: #2b6cb0;
+    }
+
+    .apt-status.arrived {
+        color: #2f855a;
+    }
+
+    /* Result Styles */
+    .results-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .result-item {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .result-item:last-child {
+        border-bottom: none;
+    }
+
+    .result-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #ebf8ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-color);
+    }
+
+    .result-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .result-title {
+        font-weight: 500;
+        color: var(--text-main);
+    }
+
+    .result-date {
+        font-size: 12px;
+        color: var(--text-secondary);
+    }
+
+    .status-badge {
+        font-size: 12px;
+        padding: 4px 8px;
+        border-radius: 12px;
+        background: var(--neutral-bg);
+        color: var(--text-secondary);
+    }
+
+    .status-badge.final {
+        background: #f0fff4;
+        color: #2f855a;
+    }
+</style>

@@ -1,5 +1,7 @@
 {
   "compileOnSave": false,
+  "strictTemplates": true,
+
   "compilerOptions": {
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
@@ -16,6 +18,7 @@
       "dom"
     ]
     ,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "experimentalDecorators": true
   }
 }
