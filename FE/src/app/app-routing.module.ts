@@ -6,6 +6,8 @@ import { PatientObservationComponent } from './patient/patient-observation.compo
 import { PatientObservationListComponent } from './patient/patient-observation-list.component';
 import { PractitionerListComponent } from './practitioner/practitioner-list.component';
 import { PractitionerEditorComponent } from './practitioner/practitioner-editor.component';
+import { RoleGuard } from './services/role.guard';
+import { Roles } from './services/roles';
 import { ConsentListComponent } from './consent/consent-list.component';
 import { ConsentEditorComponent } from './consent/consent-editor.component';
 import { OrganizationListComponent } from './organization/organization-list.component';
@@ -34,9 +36,9 @@ const routes: Routes = [
   { path: 'patients/:id/observations', component: PatientObservationListComponent },
   { path: 'patients/:id/observation', component: PatientObservationComponent },
   { path: 'patients/:id', component: PatientEditorComponent }
-  , { path: 'practitioners', component: PractitionerListComponent },
-  { path: 'practitioners/new', component: PractitionerEditorComponent },
-  { path: 'practitioners/:id', component: PractitionerEditorComponent }
+  , { path: 'practitioners', component: PractitionerListComponent, canActivate: [RoleGuard], data: { roles: [Roles.Practitioner] } },
+  { path: 'practitioners/new', component: PractitionerEditorComponent, canActivate: [RoleGuard], data: { roles: [Roles.Practitioner] } },
+  { path: 'practitioners/:id', component: PractitionerEditorComponent, canActivate: [RoleGuard], data: { roles: [Roles.Practitioner] } }
   , { path: 'consents', component: ConsentListComponent }
   , { path: 'consents/new', component: ConsentEditorComponent }
   , { path: 'consents/:id', component: ConsentEditorComponent }

@@ -4,12 +4,15 @@
       <div class="brand">
         <i class="pi pi-heart-fill" style="font-size: 1.5rem; color: var(--primary-color);"></i>
         <h1>Clinic.AI</h1>
-      </div>
-
+      </div> 
       <!-- Desktop Navigation -->
       <nav class="main-nav desktop-nav ">
-        <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+        <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>    
         <a routerLink="/patient-portal" routerLinkActive="active">My Portal</a>
+
+        </nav>
+         <nav class="main-nav desktop-nav" *ngIf="auth.hasRole(Roles.Practitioner)">
+        <a routerLink="/practitioner-portal" routerLinkActive="active">Dashboard</a>
         <a routerLink="/patients" routerLinkActive="active">Patients</a>
         <a routerLink="/appointments" routerLinkActive="active">Appointments</a>
         <a routerLink="/practitioners" routerLinkActive="active">Practitioners</a>
@@ -20,6 +23,7 @@
         <a routerLink="/invoices" routerLinkActive="active">Invoices</a>
         <a routerLink="/coverages" routerLinkActive="active">Coverages</a>
         <a routerLink="/medication-requests" routerLinkActive="active">Medication Requests</a>
+      
       </nav>
 
       <div class="user-actions desktop-actions">
@@ -55,7 +59,7 @@
           <i class="pi pi-calendar"></i>
           <span>Appointments</span>
         </a>
-        <a routerLink="/practitioners" routerLinkActive="active" (click)="toggleMobileMenu()">
+        <a *ngIf="auth.hasRole(Roles.Practitioner)" routerLink="/practitioners" routerLinkActive="active" (click)="toggleMobileMenu()">
           <i class="pi pi-user-plus"></i>
           <span>Practitioners</span>
         </a>
