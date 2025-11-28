@@ -237,8 +237,8 @@ export class AppointmentEditorComponent implements OnInit {
         this.id = this.route.snapshot.paramMap.get('id');
          // Check for query params to pre-fill
     this.route.queryParams.subscribe(params => {
-      if (params['patient']) {
-        this.subjectRef = params['patient'];
+      if (params['SubjectRef']) {
+        this.subjectRef = params['SubjectRef'];
       } 
       if (params['participant.actor']) {
         this.participants = [{ actorRef: params['participant.actor'], status: 'needs-action', required: true }];
