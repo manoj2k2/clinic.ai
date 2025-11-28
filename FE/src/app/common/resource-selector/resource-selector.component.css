@@ -18,6 +18,20 @@
   box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
 }
 
+.input-wrap { position: relative; }
+.clear-btn {
+  position: absolute;
+  right: 36px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.clear-btn:hover { color: var(--text-main); }
+
 /* Simple spinner */
 .spinner {
   position: absolute;
@@ -56,3 +70,18 @@
 .dropdown li:hover {
   background: var(--neutral-bg);
 }
+
+.dropdown li.highlight {
+  background: rgba(59,130,246,0.08);
+  color: var(--primary-color);
+}
+
+.no-results {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* Improve scrollbar visuals */
+.dropdown::-webkit-scrollbar { width: 8px; }
+.dropdown::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 8px; }

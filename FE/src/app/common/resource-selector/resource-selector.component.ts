@@ -15,6 +15,7 @@ interface SimpleResource {
   styleUrls: ['./resource-selector.component.css']
 })
 export class ResourceSelectorComponent implements OnInit {
+ 
   /** FHIR resource type to query, e.g. 'Practitioner' */
   @Input() resourceType!: string;
 
@@ -29,6 +30,9 @@ export class ResourceSelectorComponent implements OnInit {
 
   /** Current term shown in the input box (used for display) */
   searchTerm = '';
+
+  /** Highlighted index for keyboard navigation */
+  highlightedIndex = -1;
 
   /** Internal subject for debounced searching */
   private searchTerm$ = new Subject<string>();
@@ -56,6 +60,7 @@ export class ResourceSelectorComponent implements OnInit {
     this.searchTerm = term;
     this.loading = true;
     this.searchTerm$.next(term);
+    this.highlightedIndex = -1;
   }
 
   /** Perform the FHIR request and map the bundle to SimpleResource[] */
@@ -67,7 +72,14 @@ export class ResourceSelectorComponent implements OnInit {
         const entries = bundle.entry || [];
         return entries.map((e: any) => {
           const r = e.resource;
-          const display = r.name?.[0]?.text || r.name?.[0] || r.title || r.identifier?.[0]?.value || r.id;
+          let display = '';
+          if(this.resourceType === 'Practitioner') {
+            const name = r.name?.[0];
+            display = name ? `${name.given?.join(' ') || ''} ${name.family || ''}`.trim() : '';
+          }
+          if (this.resourceType === 'Organization') {
+            display = r.name || '';
+          }
           return { id: r.id, display: display ?? r.id } as SimpleResource;
         });
       })
@@ -79,5 +91,36 @@ export class ResourceSelectorComponent implements OnInit {
     this.searchTerm = resource.display; // show chosen label in the input
     this.selectedId.emit(resource.id);
     this.results = [];
+    this.highlightedIndex = -1;
+  }
+
+  clear(): void {
+    this.searchTerm = '';
+    this.results = [];
+    this.selectedId.emit('');
+    this.highlightedIndex = -1;
+  }
+
+  onKeyDown(e: KeyboardEvent): void {
+    if (!this.results || this.results.length === 0) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      this.highlightedIndex = Math.min(this.results.length - 1, this.highlightedIndex + 1);
+      return;
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      this.highlightedIndex = Math.max(0, this.highlightedIndex - 1);
+      return;
+    }
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (this.highlightedIndex >= 0 && this.highlightedIndex < this.results.length) {
+        this.select(this.results[this.highlightedIndex]);
+      }
+    }
+    if (e.key === 'Escape') {
+      this.clear();
+    }
   }
 }

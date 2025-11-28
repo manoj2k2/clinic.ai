@@ -21,11 +21,18 @@ import { FhirService } from '../services/fhir.service';
             <div class="form-section-title">References</div>
             <div class="form-field">
               <label>Practitioner Reference</label>
-              <input type="text" [(ngModel)]="practitionerRef" name="practitionerRef" placeholder="Practitioner/123" />
+              <app-resource-selector resourceType="Practitioner"
+               placeholder="Search practitioners"
+                (selectedId)="onPractitionerSelected($event)"></app-resource-selector>
+              <div *ngIf="practitionerRef" >Selected: {{practitionerRef}}</div>
             </div>
             <div class="form-field">
               <label>Organization Reference</label>
-              <input type="text" [(ngModel)]="organizationRef" name="organizationRef" placeholder="Organization/123" />
+               <app-resource-selector resourceType="Organization"
+               placeholder="Search organizations" 
+               (selectedId)="onOrganizationSelected($event)"></app-resource-selector>
+              <div *ngIf="organizationRef" >Selected: {{organizationRef}}</div>
+           
             </div>
           </div>
 
@@ -74,25 +81,7 @@ import { FhirService } from '../services/fhir.service';
       </div>
     </div>
   `,
-  styles: [`
-    .editor-container { padding: 24px; max-width: 800px; margin: 0 auto; }
-    .editor-card { background: white; padding: 32px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-    .page-header { margin-bottom: 24px; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; }
-    .page-header h2 { margin: 0; color: #1e293b; font-size: 24px; }
-    .form-section { margin-bottom: 32px; }
-    .form-section-title { font-size: 18px; font-weight: 600; color: #334155; margin-bottom: 16px; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    .form-field { margin-bottom: 16px; }
-    .form-field label { display: block; margin-bottom: 8px; font-weight: 500; color: #475569; font-size: 14px; }
-    .form-field input, .form-field select, .form-field textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; transition: border-color 0.2s; }
-    .form-field input:focus, .form-field select:focus, .form-field textarea:focus { outline: none; border-color: #3b82f6; ring: 2px solid #bfdbfe; }
-    .btn { padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; font-weight: 500; font-size: 14px; }
-    .btn-primary { background-color: #3b82f6; color: white; }
-    .btn-secondary { background-color: #f1f5f9; color: #475569; }
-    .btn-danger { background-color: #ef4444; color: white; }
-    .loading { text-align: center; padding: 40px; color: #64748b; }
-    .error-msg { background-color: #fee2e2; color: #991b1b; padding: 12px; border-radius: 6px; margin-bottom: 16px; }
-  `]
+  styles: [ ]
 })
 export class PractitionerRoleEditorComponent implements OnInit {
   isNew = true;
@@ -129,6 +118,15 @@ export class PractitionerRoleEditorComponent implements OnInit {
   ];
 
   constructor(private route: ActivatedRoute, private router: Router, private fhir: FhirService) { }
+
+  onPractitionerSelected(id: string) {
+    // store as a full reference used by PractitionerRole.practitioner.reference
+    this.practitionerRef = id ? `Practitioner/${id}` : '';
+  }
+  onOrganizationSelected(id: string) {
+    // store as a full reference used by PractitionerRole.organization.reference
+    this.organizationRef = id ? `Organization/${id}` : '';
+  }
 
   ngOnInit(): void {
     this.id = this.route.snapshot.paramMap.get('id');
