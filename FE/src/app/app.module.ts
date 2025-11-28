@@ -17,6 +17,7 @@ import { AppointmentModule } from './appointment/appointment.module';
 import { MedicationRequestModule } from './medication-request/medication-request.module';
 import { CoverageModule } from './coverage/coverage.module';
 import { PractitionerRoleModule } from './practitioner-role/practitioner-role.module';
+import { LocationModule } from './location/location.module';
 import { AuthService } from './services/auth.service';
 import { FhirService } from './services/fhir.service';
 import { practitionerPortalDashboardComponent } from './practitioner-portal/practitioner-portal.component';
@@ -30,6 +31,7 @@ import { SharedModule } from './common/shared.module';
     OrganizationModule, DiagnosticReportModule, InvoiceModule, 
     ObservationModule, AppointmentModule, MedicationRequestModule,
      CoverageModule, PractitionerRoleModule,
+      LocationModule,
       OAuthModule.forRoot()],
   providers: [AuthService, FhirService],
   bootstrap: [AppComponent]

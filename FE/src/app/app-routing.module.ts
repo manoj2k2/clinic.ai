@@ -26,6 +26,8 @@ import { CoverageListComponent } from './coverage/coverage-list.component';
 import { CoverageEditorComponent } from './coverage/coverage-editor.component';
 import { PractitionerRoleListComponent } from './practitioner-role/practitioner-role-list.component';
 import { PractitionerRoleEditorComponent } from './practitioner-role/practitioner-role-editor.component';
+import { LocationListComponent } from './location/location-list.component';
+import { LocationEditorComponent } from './location/location-editor.component';
 import { practitionerPortalDashboardComponent } from './practitioner-portal/practitioner-portal.component';
 import { PatientPortalComponent } from './patient-portal/patient-portal.component';
 import { ResourceSelectorComponent } from './common/resource-selector/resource-selector.component';
@@ -69,6 +71,9 @@ const routes: Routes = [
   , { path: 'practitioner-roles', component: PractitionerRoleListComponent }
   , { path: 'practitioner-roles/new', component: PractitionerRoleEditorComponent }
   , { path: 'practitioner-roles/:id', component: PractitionerRoleEditorComponent }
+  , { path: 'locations', component: LocationListComponent }
+  , { path: 'locations/new', component: LocationEditorComponent }
+  , { path: 'locations/:id', component: LocationEditorComponent }
 
 ];
 

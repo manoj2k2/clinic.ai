@@ -5,6 +5,8 @@ import { RouterModule } from '@angular/router';
 
 import { AppointmentListComponent } from './appointment-list.component';
 import { AppointmentEditorComponent } from './appointment-editor.component';
+import { SharedModule } from '../common/shared.module';
+
 
 @NgModule({
     declarations: [
@@ -14,7 +16,8 @@ import { AppointmentEditorComponent } from './appointment-editor.component';
     imports: [
         CommonModule,
         FormsModule,
-        RouterModule
+        RouterModule,
+        SharedModule
     ],
     exports: [
         AppointmentListComponent,

@@ -73,7 +73,8 @@ export class ResourceSelectorComponent implements OnInit {
         return entries.map((e: any) => {
           const r = e.resource;
           let display = '';
-          if(this.resourceType === 'Practitioner') {
+          if(this.resourceType === 'Practitioner'
+             || this.resourceType === 'Patient') {
             const name = r.name?.[0];
             display = name ? `${name.given?.join(' ') || ''} ${name.family || ''}`.trim() : '';
           }
