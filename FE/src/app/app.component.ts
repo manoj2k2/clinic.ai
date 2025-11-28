@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { AuthService } from './services/auth.service';
+import { Roles } from './services/roles';
 
 @Component({
   selector: 'app-root',
@@ -7,6 +8,7 @@ import { AuthService } from './services/auth.service';
 })
 export class AppComponent {
   mobileMenuOpen = false;
+  public Roles = Roles;
 
   constructor(public auth: AuthService) { }
 
