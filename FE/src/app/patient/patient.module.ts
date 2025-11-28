@@ -7,9 +7,29 @@ import { PatientEditorComponent } from './patient-editor.component';
 import { PatientObservationComponent } from './patient-observation.component';
 import { PatientObservationListComponent } from './patient-observation-list.component';
 
+import { ZXingScannerModule } from '@zxing/ngx-scanner';
+import { EhicScannerComponent } from './ehic-scanner/ehic-scanner.component';
+
 @NgModule({
-  declarations: [PatientListComponent, PatientEditorComponent, PatientObservationComponent, PatientObservationListComponent],
-  imports: [CommonModule, FormsModule, RouterModule],
-  exports: [PatientListComponent, PatientEditorComponent, PatientObservationComponent, PatientObservationListComponent]
+  declarations: [
+    PatientListComponent, 
+    PatientEditorComponent, 
+    PatientObservationComponent, 
+    PatientObservationListComponent,
+    EhicScannerComponent
+  ],
+  imports: [
+    CommonModule, 
+    FormsModule, 
+    RouterModule,
+    ZXingScannerModule
+  ],
+  exports: [
+    PatientListComponent, 
+    PatientEditorComponent, 
+    PatientObservationComponent, 
+    PatientObservationListComponent,
+    EhicScannerComponent
+  ]
 })
 export class PatientModule { }

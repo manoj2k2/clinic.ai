@@ -10,6 +10,13 @@ import { FhirService } from '../services/fhir.service';
       <div class="page-header">
         <h2 *ngIf="isNew">Create Patient</h2>
         <h2 *ngIf="!isNew">Edit Patient</h2>
+        <button type="button" (click)="showScanner = !showScanner" class="btn btn-outline" style="margin-left: auto;">
+          {{ showScanner ? 'Close Scanner' : 'Scan EHIC' }}
+        </button>
+      </div>
+
+      <div *ngIf="showScanner" style="margin-bottom: 20px;">
+        <app-ehic-scanner (scanSuccess)="onScanSuccess($event)"></app-ehic-scanner>
       </div>
 
       <div *ngIf="loading" class="loading">Loading...</div>
@@ -65,6 +72,7 @@ export class PatientEditorComponent implements OnInit {
   id: string | null = null;
   loading = false;
   error: string | null = null;
+  showScanner = false;
 
   // form fields
   nameGiven = '';
@@ -128,5 +136,33 @@ export class PatientEditorComponent implements OnInit {
     if (this.id) {
       this.router.navigate(['/patients', this.id, 'observations']);
     }
+  }
+
+  onScanSuccess(data: any) {
+    this.showScanner = false;
+    console.log('EHIC Data:', data);
+    
+    // Auto-populate fields if data is available
+    // Note: This is a basic mapping. Real EHIC data parsing depends on the specific barcode format.
+    if (data.expiryDate) {
+      // Could store this in a coverage resource
+      console.log('Card expires:', data.expiryDate);
+    }
+    
+    // If the parser extracted names (this depends on the parser implementation in EhicScannerComponent)
+    if (data.surname) {
+      this.family = data.surname;
+    }
+    if (data.givenName) {
+      this.nameGiven = data.givenName;
+    }
+    if (data.birthDate) {
+      this.birthDate = data.birthDate;
+    }
+    if (data.personalId) {
+      // Could be stored as an identifier
+    }
+    
+    alert('Scanned successfully! Data logged to console.');
   }
 }

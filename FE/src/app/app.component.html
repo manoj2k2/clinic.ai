@@ -4,11 +4,10 @@
       <div class="brand">
         <i class="pi pi-heart-fill" style="font-size: 1.5rem; color: var(--primary-color);"></i>
         <h1>Clinic.AI</h1>
-      </div>
-
-      <!-- Desktop Navigation --> 
-        
-        <nav class="main-nav desktop-nav" *ngIf="auth.hasRole(Roles.Patient)">
+      </div> 
+      <!-- Desktop Navigation -->
+      <nav class="main-nav desktop-nav ">
+        <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>    
         <a routerLink="/patient-portal" routerLinkActive="active">My Portal</a>
 
         </nav>

@@ -1,0 +1,27 @@
+<div class="ehic-scanner-container">
+  <button (click)="toggleScanner()" class="scan-btn">
+    {{ isScanning ? 'Stop Scanning' : 'Scan EHIC Card' }}
+  </button>
+
+  <div *ngIf="isScanning" class="scanner-wrapper">
+    <div *ngIf="hasPermission === null" class="permission-warning">
+      Requesting camera permission... Please allow access in your browser.
+    </div>
+    <div *ngIf="hasPermission === false" class="permission-error">
+      Camera permission denied. Please enable camera access in your browser settings.
+    </div>
+    <div *ngIf="hasDevices === false" class="permission-error">
+      No camera devices found.
+    </div>
+    
+    <zxing-scanner
+      [formats]="allowedFormats"
+      (scanSuccess)="onScanSuccess($event)"
+      (permissionResponse)="onHasPermission($event)"
+      (camerasFound)="onCamerasFound($event)"
+      (camerasNotFound)="onCamerasNotFound()">
+    </zxing-scanner>
+    
+    <p class="instruction">Point camera at the barcode/QR code on the EHIC card</p>
+  </div>
+</div>
