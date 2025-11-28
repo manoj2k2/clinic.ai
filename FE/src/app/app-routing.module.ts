@@ -24,6 +24,8 @@ import { MedicationRequestListComponent } from './medication-request/medication-
 import { MedicationRequestEditorComponent } from './medication-request/medication-request-editor.component';
 import { CoverageListComponent } from './coverage/coverage-list.component';
 import { CoverageEditorComponent } from './coverage/coverage-editor.component';
+import { PractitionerRoleListComponent } from './practitioner-role/practitioner-role-list.component';
+import { PractitionerRoleEditorComponent } from './practitioner-role/practitioner-role-editor.component';
 import { practitionerPortalDashboardComponent } from './practitioner-portal/practitioner-portal.component';
 import { PatientPortalComponent } from './patient-portal/patient-portal.component';
 
@@ -63,6 +65,9 @@ const routes: Routes = [
   , { path: 'appointments', component: AppointmentListComponent }
   , { path: 'appointments/new', component: AppointmentEditorComponent }
   , { path: 'appointments/:id', component: AppointmentEditorComponent }
+  , { path: 'practitioner-roles', component: PractitionerRoleListComponent }
+  , { path: 'practitioner-roles/new', component: PractitionerRoleEditorComponent }
+  , { path: 'practitioner-roles/:id', component: PractitionerRoleEditorComponent }
 ];
 
 @NgModule({

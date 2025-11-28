@@ -230,6 +230,31 @@ export class FhirService {
   deleteCoverage(id: string): Observable<any> {
     return this.http.delete(`/fhir/Coverage/${id}`);
   }
+
+  // PractitionerRole CRUD
+  getPractitionerRoles(): Observable<any> {
+    return this.http.get('/fhir/PractitionerRole');
+  }
+
+  getPractitionerRole(id: string): Observable<any> {
+    return this.http.get(`/fhir/PractitionerRole/${id}`);
+  }
+
+  createPractitionerRole(role: any): Observable<any> {
+    return this.http.post('/fhir/PractitionerRole', role);
+  }
+
+  updatePractitionerRole(id: string, role: any): Observable<any> {
+    return this.http.put(`/fhir/PractitionerRole/${id}`, role);
+  }
+
+  deletePractitionerRole(id: string): Observable<any> {
+    return this.http.delete(`/fhir/PractitionerRole/${id}`);
+  }
+
+  getPractitionerRolesForOrganization(orgId: string): Observable<any> {
+    return this.http.get(`/fhir/PractitionerRole?organization=Organization/${orgId}`);
+  }
 }
 
 

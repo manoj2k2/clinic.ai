@@ -16,6 +16,7 @@ import { ObservationModule } from './observation/observation.module';
 import { AppointmentModule } from './appointment/appointment.module';
 import { MedicationRequestModule } from './medication-request/medication-request.module';
 import { CoverageModule } from './coverage/coverage.module';
+import { PractitionerRoleModule } from './practitioner-role/practitioner-role.module';
 import { AuthService } from './services/auth.service';
 import { FhirService } from './services/fhir.service';
 import { practitionerPortalDashboardComponent } from './practitioner-portal/practitioner-portal.component';
@@ -23,7 +24,7 @@ import { PatientPortalComponent } from './patient-portal/patient-portal.componen
 
 @NgModule({
   declarations: [AppComponent, practitionerPortalDashboardComponent, PatientPortalComponent],
-  imports: [BrowserModule, HttpClientModule, FormsModule, AppRoutingModule, PatientModule, PractitionerModule, ConsentModule, OrganizationModule, DiagnosticReportModule, InvoiceModule, ObservationModule, AppointmentModule, MedicationRequestModule, CoverageModule, OAuthModule.forRoot()],
+  imports: [BrowserModule, HttpClientModule, FormsModule, AppRoutingModule, PatientModule, PractitionerModule, ConsentModule, OrganizationModule, DiagnosticReportModule, InvoiceModule, ObservationModule, AppointmentModule, MedicationRequestModule, CoverageModule, PractitionerRoleModule, OAuthModule.forRoot()],
   providers: [AuthService, FhirService],
   bootstrap: [AppComponent]
 

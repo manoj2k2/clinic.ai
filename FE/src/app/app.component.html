@@ -6,12 +6,12 @@
         <h1>Clinic.AI</h1>
       </div> 
       <!-- Desktop Navigation -->
-      <nav class="main-nav desktop-nav ">
+      <nav class="main-nav desktop-nav " *ngIf="auth.hasRole(Roles.Patient)">
         <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>    
         <a routerLink="/patient-portal" routerLinkActive="active">My Portal</a>
-
-        </nav>
-         <nav class="main-nav desktop-nav" *ngIf="auth.hasRole(Roles.Practitioner)">
+      </nav>
+      
+      <nav class="main-nav desktop-nav" *ngIf="auth.hasRole(Roles.Practitioner)">
         <a routerLink="/practitioner-portal" routerLinkActive="active">Dashboard</a>
         <a routerLink="/patients" routerLinkActive="active">Patients</a>
         <a routerLink="/appointments" routerLinkActive="active">Appointments</a>

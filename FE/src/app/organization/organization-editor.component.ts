@@ -87,11 +87,12 @@ import { FhirService } from '../services/fhir.service';
           </div>
         </div>
 
-        <div class="actions" style="display:flex; justify-content:flex-end; gap:12px; margin-top:24px">
-          <button type="button" (click)="cancel()" class="btn btn-secondary">Cancel</button>
-          <button *ngIf="!isNew" type="button" (click)="remove()" class="btn btn-danger">Delete</button>
-          <button type="submit" class="btn btn-primary">Save</button>
-        </div>
+          <div class="actions" style="display:flex; justify-content:flex-end; gap:12px; margin-top:24px">
+            <button type="button" (click)="cancel()" class="btn btn-secondary">Cancel</button>
+            <button *ngIf="!isNew" type="button" (click)="addPractitionerRole()" class="btn btn-outline">Add Practitioner</button>
+            <button *ngIf="!isNew" type="button" (click)="remove()" class="btn btn-danger">Delete</button>
+            <button type="submit" class="btn btn-primary">Save</button>
+          </div>
       </form>
     </div>
   </div>
@@ -225,4 +226,10 @@ export class OrganizationEditorComponent implements OnInit {
     }
 
     cancel() { this.router.navigate(['/organizations']); }
+
+    addPractitionerRole() {
+        if (this.id) {
+            this.router.navigate(['/practitioner-roles/new'], { queryParams: { organization: 'Organization/' + this.id } });
+        }
+    }
 }
