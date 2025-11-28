@@ -28,6 +28,7 @@ import { PractitionerRoleListComponent } from './practitioner-role/practitioner-
 import { PractitionerRoleEditorComponent } from './practitioner-role/practitioner-role-editor.component';
 import { practitionerPortalDashboardComponent } from './practitioner-portal/practitioner-portal.component';
 import { PatientPortalComponent } from './patient-portal/patient-portal.component';
+import { ResourceSelectorComponent } from './common/resource-selector/resource-selector.component';
 
 const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
@@ -68,6 +69,7 @@ const routes: Routes = [
   , { path: 'practitioner-roles', component: PractitionerRoleListComponent }
   , { path: 'practitioner-roles/new', component: PractitionerRoleEditorComponent }
   , { path: 'practitioner-roles/:id', component: PractitionerRoleEditorComponent }
+
 ];
 
 @NgModule({

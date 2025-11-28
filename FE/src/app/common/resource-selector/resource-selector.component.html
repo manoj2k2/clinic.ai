@@ -1,0 +1,18 @@
+<!-- src/app/common/resource-selector/resource-selector.component.html -->
+<div class="selector">
+  <input
+    type="text"
+    class="search-input"
+    [placeholder]="placeholder"
+    (input)="onSearch($event.target.value)"
+    autocomplete="off"
+  />
+
+  <div class="spinner" *ngIf="loading"></div>
+
+  <ul class="dropdown" *ngIf="results.length">
+    <li *ngFor="let r of results" (click)="select(r)">
+      {{ r.display }}
+    </li>
+  </ul>
+</div>

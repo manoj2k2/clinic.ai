@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 
 @Injectable()
 export class FhirService {
-  constructor(private http: HttpClient) { }
+  constructor(public http: HttpClient) { }
 
   getPatients(): Observable<any> {
     // Proxy will forward /fhir to the HAPI server at localhost:8082
