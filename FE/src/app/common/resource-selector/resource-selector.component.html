@@ -1,0 +1,29 @@
+<!-- src/app/common/resource-selector/resource-selector.component.html -->
+<div class="selector" (keydown)="onKeyDown($event)" tabindex="0">
+  <div class="input-wrap">
+    <input
+      type="text"
+      class="search-input"
+      [placeholder]="placeholder"
+      (input)="onSearch($event.target.value)"
+      [value]="searchTerm"
+      autocomplete="off"
+      aria-label="resource search"
+    />
+
+    <button *ngIf="searchTerm && !loading" class="clear-btn" (click)="clear()" aria-label="clear">✕</button>
+    <div class="spinner" *ngIf="loading" aria-hidden="true"></div>
+  </div>
+
+  <ul class="dropdown" *ngIf="results.length">
+    <li *ngFor="let r of results; let i = index"
+        (click)="select(r)"
+        [class.highlight]="i === highlightedIndex"
+        role="option"
+        aria-selected="{{i === highlightedIndex}}">
+      {{ r.display }}
+    </li>
+  </ul>
+
+  <div class="no-results" *ngIf="!loading && searchTerm && results.length === 0">No results</div>
+</div>

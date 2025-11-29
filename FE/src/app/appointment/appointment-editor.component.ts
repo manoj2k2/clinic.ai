@@ -49,7 +49,10 @@ import { FhirService } from '../services/fhir.service';
 
           <div class="form-field">
             <label>Subject Reference (Patient)</label>
-            <input type="text" [(ngModel)]="subjectRef" name="subjectRef" placeholder="Patient/123" />
+              <app-resource-selector resourceType="Patient"
+               placeholder="Search Patient"
+                (selectedId)="onPatientSelected($event)"></app-resource-selector>
+              <div *ngIf="subjectRef" >Selected: {{subjectRef}}</div>
           </div>
         </div>
 
@@ -117,7 +120,10 @@ import { FhirService } from '../services/fhir.service';
             <div class="form-row">
               <div class="form-field">
                 <label>Actor Reference</label>
-                <input type="text" [(ngModel)]="participant.actorRef" [name]="'actorRef' + i" placeholder="Practitioner/123 or Location/456" />
+                <app-resource-selector resourceType="Practitioner" [name]="'actorRef' + i"
+                 placeholder="Search Practitioner or Location"
+                  (selectedId)="onParticipantSelected($event, i)"></app-resource-selector>
+                  <div *ngIf="participant.actorRef" >Selected: {{participant.actorRef}}</div>
               </div>
               <div class="form-field">
                 <label>Status</label>
@@ -229,6 +235,15 @@ export class AppointmentEditorComponent implements OnInit {
 
     ngOnInit(): void {
         this.id = this.route.snapshot.paramMap.get('id');
+         // Check for query params to pre-fill
+    this.route.queryParams.subscribe(params => {
+      if (params['SubjectRef']) {
+        this.subjectRef = params['SubjectRef'];
+      } 
+      if (params['participant.actor']) {
+        this.participants = [{ actorRef: params['participant.actor'], status: 'needs-action', required: true }];
+      }
+    });
         if (this.id && this.id !== 'new') {
             this.isNew = false;
             this.loading = true;
@@ -259,11 +274,13 @@ export class AppointmentEditorComponent implements OnInit {
                     this.patientInstruction = r.patientInstruction?.[0]?.concept?.text || '';
 
                     if (r.participant && r.participant.length > 0) {
-                        this.participants = r.participant.map((p: any) => ({
-                            actorRef: p.actor?.reference || '',
-                            status: p.status || 'needs-action',
-                            required: p.required !== false
-                        }));
+                      this.participants = r.participant.map((p: any) => ({
+                        actorRef: p.actor?.reference || '',
+                        status: p.status || 'needs-action',
+                        // FHIR stores `required` as code: 'required' | 'optional' | 'information-only'
+                        // map to boolean for the UI: true => 'required', false => 'optional'
+                        required: p.required === 'required'
+                      }));
                     }
 
                     this.loading = false;
@@ -283,6 +300,15 @@ export class AppointmentEditorComponent implements OnInit {
             const endTime = new Date(now.getTime() + 90 * 60 * 1000);
             this.end = endTime.toISOString().slice(0, 16);
         }
+    }
+
+    onPatientSelected(id: string) {
+        // store as a full reference used by Appointment.subject.reference
+        this.subjectRef = id ? `Patient/${id}` : '';
+    }
+    
+    onParticipantSelected(id: string, index: number) {
+        this.participants[index].actorRef = id ? `Practitioner/${id}` : '';
     }
 
     onPriorityChange() {
@@ -359,9 +385,10 @@ export class AppointmentEditorComponent implements OnInit {
                 concept: { text: this.patientInstruction }
             }] : [],
             participant: this.participants.map(p => ({
-                actor: { reference: p.actorRef },
-                status: p.status,
-                required: p.required
+              actor: { reference: p.actorRef },
+              status: p.status,
+              // convert UI boolean back to FHIR code
+              required: p.required ? 'required' : 'optional'
             }))
         };
 

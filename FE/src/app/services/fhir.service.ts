@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 
 @Injectable()
 export class FhirService {
-  constructor(private http: HttpClient) { }
+  constructor(public http: HttpClient) { }
 
   getPatients(): Observable<any> {
     // Proxy will forward /fhir to the HAPI server at localhost:8082
@@ -254,6 +254,27 @@ export class FhirService {
 
   getPractitionerRolesForOrganization(orgId: string): Observable<any> {
     return this.http.get(`/fhir/PractitionerRole?organization=Organization/${orgId}`);
+  }
+
+  // Location CRUD
+  getLocations(): Observable<any> {
+    return this.http.get('/fhir/Location');
+  }
+
+  getLocation(id: string): Observable<any> {
+    return this.http.get(`/fhir/Location/${id}`);
+  }
+
+  createLocation(location: any): Observable<any> {
+    return this.http.post('/fhir/Location', location);
+  }
+
+  updateLocation(id: string, location: any): Observable<any> {
+    return this.http.put(`/fhir/Location/${id}`, location);
+  }
+
+  deleteLocation(id: string): Observable<any> {
+    return this.http.delete(`/fhir/Location/${id}`);
   }
 }
 

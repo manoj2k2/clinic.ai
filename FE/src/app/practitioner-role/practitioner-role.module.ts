@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 
 import { PractitionerRoleListComponent } from  './practitioner-role-list.component';
 import { PractitionerRoleEditorComponent } from  './practitioner-role-editor.component';
+import { SharedModule } from '../common/shared.module';
 
 @NgModule({
   declarations: [
@@ -14,6 +15,7 @@ import { PractitionerRoleEditorComponent } from  './practitioner-role-editor.com
   imports: [
     CommonModule,
     FormsModule,
+    SharedModule,
     RouterModule
   ],
   exports: [
