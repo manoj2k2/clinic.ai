@@ -32,6 +32,7 @@
                     <div class="apt-info">
                         <span class="apt-time">{{ apt.start | date:'shortTime' }}</span>
                         <span class="apt-desc">{{ apt.description || 'Consultation' }}</span>
+                        <span *ngIf="apt.practitioners?.length" class="apt-practitioner">with {{ apt.practitioners.join(', ') }}</span>
                         <span class="apt-status" [class]="apt.status">{{ apt.status }}</span>
                     </div>
                 </div>

@@ -12,7 +12,7 @@ export class FhirService {
   }
 
   getAppointmentsForPatient(patientId: string): Observable<any> {
-    return this.http.get(`/fhir/Appointment?patient=Patient/${patientId}`);
+    return this.http.get(`/fhir/Appointment?_search?patient=Patient${patientId}`);
   }
 
   getPatient(id: string): Observable<any> {

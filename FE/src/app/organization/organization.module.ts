@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 
 import { OrganizationListComponent } from './organization-list.component';
 import { OrganizationEditorComponent } from './organization-editor.component';
+import { SharedModule } from '../common/shared.module';
 
 @NgModule({
     declarations: [
@@ -14,7 +15,8 @@ import { OrganizationEditorComponent } from './organization-editor.component';
     imports: [
         CommonModule,
         FormsModule,
-        RouterModule
+        RouterModule,
+        SharedModule
     ],
     exports: [
         OrganizationListComponent,

@@ -1,0 +1,14 @@
+.address {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.address .line {
+  margin-bottom: 4px;
+}
+.address .city-postal {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.address .city { font-weight: 600; color: var(--text-main); }
+.address .postal, .address .country { color: var(--text-secondary); }

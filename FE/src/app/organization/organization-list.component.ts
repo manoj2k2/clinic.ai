@@ -29,8 +29,10 @@ import { FhirService } from '../services/fhir.service';
             <span class="info-value">{{org.resource?.name || '—'}}</span>
           </div>
           <div class="info-row">
-            <span class="info-label">City:</span>
+          <span class="info-label">City:</span>
             <span class="info-value">{{org.resource?.address?.[0]?.city || '—'}}</span>
+          <span class="info-label">Address:</span>
+            <span class="info-value"><app-address [address]="org.resource?.address"></app-address></span>
           </div>
         </div>
         <div class="card-actions">

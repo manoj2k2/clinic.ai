@@ -1,0 +1,8 @@
+<div class="address" *ngIf="primary() as a">
+  <div class="line" *ngIf="displayLine(a)">{{ displayLine(a) }}</div>
+  <div class="city-postal">
+    <span class="city" *ngIf="displayCity(a)">{{ displayCity(a) }}</span>
+    <span class="postal" *ngIf="displayPostal(a)">{{ displayPostal(a) }}</span>
+    <span class="country" *ngIf="displayCountry(a)">{{ displayCountry(a) }}</span>
+  </div>
+</div>
