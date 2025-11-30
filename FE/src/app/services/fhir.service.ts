@@ -256,6 +256,10 @@ export class FhirService {
     return this.http.get(`/fhir/PractitionerRole?organization=Organization/${orgId}`);
   }
 
+  getPractitionerRolesForPractitioner(practitionerId: string): Observable<any> {
+    return this.http.get(`/fhir/PractitionerRole?practitioner=Practitioner/${practitionerId}`);
+  }
+
   // Location CRUD
   getLocations(): Observable<any> {
     return this.http.get('/fhir/Location');

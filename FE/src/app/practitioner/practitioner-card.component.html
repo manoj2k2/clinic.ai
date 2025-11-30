@@ -1,0 +1,27 @@
+<div class="resource-card">
+  <div class="card-header">
+    <div>
+      <div class="title">{{ practitioner?.name?.[0]?.text || (practitioner?.name?.[0]?.given?.join(' ') + ' ' + practitioner?.name?.[0]?.family) || 'Practitioner' }}</div>
+      <div class="subtitle">ID: {{ practitioner?.id }}</div>
+    </div> 
+  </div>
+  <div class="card-body">
+    <div class="info-row">
+      <div class="info-label">Qualification:</div>
+      <div class="info-value">{{ practitioner?.qualification?.[0]?.code?.text || '—' }}</div>
+    </div>
+    <div class="info-row" *ngIf="practitioner?.address?.length">
+      <div class="info-label">City:</div>
+      <div class="info-value">{{ practitioner?.address?.[0]?.city || '—' }}</div>
+    </div>
+    <div class="info-row" *ngIf="organizations?.length">
+      <div class="info-label">Organization:</div>
+      <div class="info-value">
+        <div *ngFor="let org of organizations">
+          <div style="font-weight:600">{{ org?.name || org?.id }}</div>
+          <div style="margin-top:4px"><app-address [address]="org?.address"></app-address></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

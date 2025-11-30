@@ -14,21 +14,12 @@ import { FhirService } from '../services/fhir.service';
     <div *ngIf="error" class="error-msg">{{error}}</div>
 
     <div *ngIf="practitioners?.length; else none" class="card-grid">
-      <div *ngFor="let p of practitioners" class="resource-card">
-        <div class="card-header">
-          <span class="info-value">{{p.resource?.name?.[0]?.text || (p.resource?.name?.[0]?.given?.join(' ') + ' ' + p.resource?.name?.[0]?.family) || p.resource?.id}}</span>
-          <span class="badge badge-neutral">ID: {{p.resource?.id}}</span>
-        </div>
-        <div class="card-body">
-          <div class="info-row">
-            <span class="info-label">Qualification:</span>
-            <span class="info-value">{{p.resource?.qualification?.[0]?.code?.text || '—'}}</span>
-          </div>
-        </div>
+      <div *ngFor="let p of practitioners">
+        <app-practitioner-card [practitioner]="p.resource"></app-practitioner-card>
         <div class="card-actions">
           <button type="button" [routerLink]="['/practitioners', p.resource?.id]" class="btn btn-sm btn-outline">Edit</button>
         </div>
-      </div>
+            </div>
     </div>
 
     <ng-template #none>

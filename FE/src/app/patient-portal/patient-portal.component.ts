@@ -13,6 +13,8 @@ export class PatientPortalComponent implements OnInit {
   appointments: any[] = [];
   results: any[] = [];
   practitionerMap: { [id: string]: string } = {};
+  practitionerResources: { [id: string]: any } = {};
+  selectedAppointment: any | null = null;
   loading = true;
   error: string | null = null;
 
@@ -76,6 +78,7 @@ export class PatientPortalComponent implements OnInit {
             const name = pr.name?.[0];
             const display = name ? (name.text || ((name.given?.[0] || '') + ' ' + (name.family || '')) ) : pr.id;
             this.practitionerMap[pr.id] = display;
+            this.practitionerResources[pr.id] = pr;
           });
 
           // annotate appointments with practitioner display names
@@ -100,5 +103,24 @@ export class PatientPortalComponent implements OnInit {
       this.results = (res.entry || []).map((e: any) => e.resource);
       this.loading = false;
     });
+  }
+
+  selectAppointment(apt: any) {
+    this.selectedAppointment = apt;
+  }
+
+  clearSelection() {
+    this.selectedAppointment = null;
+  }
+
+  getSelectedPractitioners(): any[] {
+    if (!this.selectedAppointment) { return []; }
+    const ids: string[] = (this.selectedAppointment.participant || []).map((p: any) => {
+      const ref = p.actor?.reference;
+      if (ref && ref.startsWith('Practitioner/')) { return ref.split('/')[1]; }
+      return null;
+    }).filter((x: any) => !!x);
+
+    return ids.map(id => this.practitionerResources[id]).filter(x => !!x);
   }
 }
