@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "localsetup": "npm install -g @angular/cli@16 && npm install --force",
     "start": "npx -p @angular/cli@16 ng serve --port 4200 --proxy-config proxy.conf.json -o",
     "startnpm": "ng serve --port 4200 --proxy-config proxy.conf.json",
     "build": "npx -p @angular/cli@16 ng build",
