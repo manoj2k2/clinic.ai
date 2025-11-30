@@ -14,30 +14,12 @@ import { FhirService } from '../services/fhir.service';
     <div *ngIf="error" class="error-msg">{{error}}</div>
 
     <div *ngIf="organizations?.length; else none" class="card-grid">
-      <div *ngFor="let org of organizations" class="resource-card">
-        <div class="card-header">
-          <span class="info-value">{{org.resource?.name || 'Unknown Name'}}</span>
-          <span class="badge badge-neutral">ID: {{org.resource?.id}}</span>
-        </div>
-        <div class="card-body">
-          <div class="info-row">
-            <span class="info-label">Type:</span>
-            <span class="info-value">{{org.resource?.type?.[0]?.coding?.[0]?.display || org.resource?.type?.[0]?.text || '—'}}</span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">Name:</span>
-            <span class="info-value">{{org.resource?.name || '—'}}</span>
-          </div>
-          <div class="info-row">
-          <span class="info-label">City:</span>
-            <span class="info-value">{{org.resource?.address?.[0]?.city || '—'}}</span>
-          <span class="info-label">Address:</span>
-            <span class="info-value"><app-address [address]="org.resource?.address"></app-address></span>
-          </div>
-        </div>
-        <div class="card-actions">
+      <div *ngFor="let org of organizations">
+        <app-organization-card [org]="org.resource"></app-organization-card>
+        
+    <div class="card-actions">
           <button type="button" [routerLink]="['/organizations', org.resource?.id]" class="btn btn-sm btn-outline">Edit</button>
-        </div>
+    </div>
       </div>
     </div>
 

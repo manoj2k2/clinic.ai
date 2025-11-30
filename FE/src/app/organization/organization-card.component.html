@@ -1,0 +1,19 @@
+<div class="resource-card">
+  <div class="card-header">
+    <div>
+      <div class="title">{{ org?.name || org?.display || 'Organization' }}</div>
+      <div class="subtitle">ID: {{ org?.id }}</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="info-row">
+      <div class="info-label">Type:</div>
+      <div class="info-value">{{ org?.type?.[0]?.coding?.[0]?.display || org?.type?.[0]?.text }}</div>
+    </div>
+    <div class="info-row">
+      <div class="info-label">Address:</div>
+      <div class="info-value"><app-address [address]="org?.address"></app-address></div>
+    </div>
+  </div>
+</div>
+
