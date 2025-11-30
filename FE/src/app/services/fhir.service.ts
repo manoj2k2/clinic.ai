@@ -280,6 +280,27 @@ export class FhirService {
   deleteLocation(id: string): Observable<any> {
     return this.http.delete(`/fhir/Location/${id}`);
   }
+
+  // Encounter CRUD
+  getEncounters(): Observable<any> {
+    return this.http.get('/fhir/Encounter');
+  }
+
+  getEncounter(id: string): Observable<any> {
+    return this.http.get(`/fhir/Encounter/${id}`);
+  }
+
+  createEncounter(encounter: any): Observable<any> {
+    return this.http.post('/fhir/Encounter', encounter);
+  }
+
+  updateEncounter(id: string, encounter: any): Observable<any> {
+    return this.http.put(`/fhir/Encounter/${id}`, encounter);
+  }
+
+  deleteEncounter(id: string): Observable<any> {
+    return this.http.delete(`/fhir/Encounter/${id}`);
+  }
 }
 
 
