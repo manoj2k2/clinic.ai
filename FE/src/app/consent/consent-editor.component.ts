@@ -22,7 +22,10 @@ import { FhirService } from '../services/fhir.service';
           <div class="form-row">
             <div class="form-field">
               <label>Patient Reference</label>
-              <input type="text" [(ngModel)]="patientRef" name="patientRef" placeholder="Patient/f001" />
+              <app-resource-selector resourceType="Patient"
+               placeholder="Search patients"
+                (selectedId)="patientRef = $event"></app-resource-selector>
+                <div *ngIf="patientRef" >Selected: {{patientRef}}</div>
             </div>
             <div class="form-field">
               <label>Status</label>
@@ -42,7 +45,10 @@ import { FhirService } from '../services/fhir.service';
             </div>
             <div class="form-field">
               <label>Organization Reference</label>
-              <input type="text" [(ngModel)]="organizationRef" name="organizationRef" placeholder="Organization/f001" />
+              <app-resource-selector resourceType="Organization"
+               placeholder="Search organizations"
+                (selectedId)="organizationRef = $event"></app-resource-selector>
+                 <div *ngIf="organizationRef" >Selected: {{organizationRef}}</div>
             </div>
           </div>
         </div>
@@ -91,7 +97,10 @@ import { FhirService } from '../services/fhir.service';
           <div class="form-row">
             <div class="form-field">
               <label>Actor Reference</label>
-              <input type="text" [(ngModel)]="provisionActorRef" name="provisionActorRef" placeholder="Organization/f001" />
+              <app-resource-selector resourceType="Organization"
+               placeholder="Search organizations"
+                (selectedId)="provisionActorRef = $event"></app-resource-selector>
+                 <div *ngIf="provisionActorRef" >Selected: {{provisionActorRef}}</div>
             </div>
             <div class="form-field">
               <label>Actions (comma separated)</label>
@@ -133,6 +142,17 @@ export class ConsentEditorComponent implements OnInit {
   provisionActions = 'access, correct';
 
   constructor(private route: ActivatedRoute, private router: Router, private fhir: FhirService) { }
+ 
+  onPatientSelected(id: string) {
+    this.patientRef = id ? `Patient/${id}` : ''; 
+  }
+
+  onOrganizationSelected(id: string) {
+    this.organizationRef = id ? `Organization/${id}` : '';
+  }
+  onProvisionActorSelected(id: string) {
+    this.provisionActorRef = id ? `Organization/${id}` : '';
+  }
 
   ngOnInit(): void {
     this.id = this.route.snapshot.paramMap.get('id');
@@ -155,7 +175,9 @@ export class ConsentEditorComponent implements OnInit {
           if (r.provision) {
             this.provisionType = r.provision.type || 'deny';
             this.provisionActorRole = r.provision.actor?.[0]?.role?.coding?.[0]?.code || '';
-            this.provisionActorRef = r.provision.actor?.[0]?.reference?.reference || '';
+            const pref: any = r.provision.actor?.[0]?.reference;
+            // handle either Reference string or { reference: string }
+            this.provisionActorRef = pref?.reference || (typeof pref === 'string' ? pref : '');
             this.provisionActions = r.provision.action?.map((a: any) => a.coding?.[0]?.code).join(', ') || '';
           }
 
@@ -223,6 +245,8 @@ export class ConsentEditorComponent implements OnInit {
     if (this.isNew) {
       this.fhir.createConsent(consent).subscribe({ next: () => this.router.navigate(['/consents']), error: (e) => this.error = e.message || 'Create failed' });
     } else if (this.id) {
+      // Ensure the resource contains an `id` field for PUT (update) operations
+      consent.id = this.id;
       this.fhir.updateConsent(this.id, consent).subscribe({ next: () => this.router.navigate(['/consents']), error: (e) => this.error = e.message || 'Update failed' });
     }
   }

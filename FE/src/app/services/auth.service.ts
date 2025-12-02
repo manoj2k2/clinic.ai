@@ -74,7 +74,6 @@ export class AuthService {
 
     // Access token may contain resource_access or realm_access as well
     const access = this.oauthService.getAccessToken();
-    console.log('Access Token:', access);
     if (access) {
       const payload = this.decodeJwt(access) || {};
       if (payload.realm_access && Array.isArray(payload.realm_access.roles)) {

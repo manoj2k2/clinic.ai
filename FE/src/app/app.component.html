@@ -6,24 +6,43 @@
         <h1>Clinic.AI</h1>
       </div> 
       <!-- Desktop Navigation -->
-      <nav class="main-nav desktop-nav " *ngIf="auth.hasRole(Roles.Patient)">
+      <nav class="main-nav desktop-nav" *ngIf="auth.hasRole(Roles.Patient)">
         <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>    
         <a routerLink="/patient-portal" routerLinkActive="active">My Portal</a>
       </nav>
       
       <nav class="main-nav desktop-nav" *ngIf="auth.hasRole(Roles.Practitioner)">
         <a routerLink="/practitioner-portal" routerLinkActive="active">Dashboard</a>
-        <a routerLink="/patients" routerLinkActive="active">Patients</a>
-        <a routerLink="/appointments" routerLinkActive="active">Appointments</a>
-        <a routerLink="/practitioners" routerLinkActive="active">Practitioners</a>
-        <a routerLink="/observations" routerLinkActive="active">Observations</a>
-        <a routerLink="/consents" routerLinkActive="active">Consents</a>
-        <a routerLink="/organizations" routerLinkActive="active">Organizations</a>
-        <a routerLink="/diagnostic-reports" routerLinkActive="active">Reports</a>
-        <a routerLink="/invoices" routerLinkActive="active">Invoices</a>
-        <a routerLink="/coverages" routerLinkActive="active">Coverages</a>
-        <a routerLink="/medication-requests" routerLinkActive="active">Medication Requests</a>
-       <a routerLink="/locations" routerLinkActive="active">Locations</a>
+        
+        <div class="nav-group">
+          <button class="nav-group-btn">Clinical <i class="pi pi-chevron-down"></i></button>
+          <div class="nav-dropdown">
+            <a routerLink="/encounters" routerLinkActive="active">Encounters</a>
+            <a routerLink="/patients" routerLinkActive="active">Patients</a>
+            <a routerLink="/appointments" routerLinkActive="active">Appointments</a>
+            <a routerLink="/observations" routerLinkActive="active">Observations</a>
+            <a routerLink="/consents" routerLinkActive="active">Consents</a>
+            <a routerLink="/medication-requests" routerLinkActive="active">Medication Requests</a>
+            <a routerLink="/diagnostic-reports" routerLinkActive="active">Reports</a>
+          </div>
+        </div>
+
+        <div class="nav-group">
+          <button class="nav-group-btn">Management <i class="pi pi-chevron-down"></i></button>
+          <div class="nav-dropdown">
+            <a routerLink="/practitioners" routerLinkActive="active">Practitioners</a>
+            <a routerLink="/organizations" routerLinkActive="active">Organizations</a>
+            <a routerLink="/locations" routerLinkActive="active">Locations</a>
+          </div>
+        </div>
+
+        <div class="nav-group">
+          <button class="nav-group-btn">Finance <i class="pi pi-chevron-down"></i></button>
+          <div class="nav-dropdown">
+            <a routerLink="/invoices" routerLinkActive="active">Invoices</a>
+            <a routerLink="/coverages" routerLinkActive="active">Coverages</a>
+          </div>
+        </div>
       </nav>
 
       <div class="user-actions desktop-actions">
@@ -36,32 +55,45 @@
         <i class="pi pi-bars"></i>
       </button>
     </div>
+  </header>
 
-    <!-- Mobile Navigation Overlay -->
-    <div class="mobile-nav-overlay" [class.active]="mobileMenuOpen" (click)="toggleMobileMenu()"></div>
-    <nav class="mobile-nav" [class.active]="mobileMenuOpen">
-      <div class="mobile-nav-header">
-        <h2>Menu</h2>
-        <button class="close-btn" (click)="toggleMobileMenu()">
-          <i class="pi pi-times"></i>
-        </button>
-      </div>
-      <div class="mobile-nav-links">
-        <a routerLink="/patients" routerLinkActive="active" (click)="toggleMobileMenu()">
-          <i class="pi pi-users"></i>
-          <span>Patients</span>
+  <!-- Mobile Navigation Overlay -->
+  <div class="mobile-nav-overlay" [class.active]="mobileMenuOpen" (click)="toggleMobileMenu()"></div>
+  <nav class="mobile-nav" [class.active]="mobileMenuOpen">
+    <div class="mobile-nav-header">
+      <h2>Menu</h2>
+      <button class="close-btn" (click)="toggleMobileMenu()">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+    <div class="mobile-nav-links">
+      <!-- Patient Mobile Links -->
+      <ng-container *ngIf="auth.hasRole(Roles.Patient)">
+        <a routerLink="/dashboard" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <i class="pi pi-home"></i>
+          <span>Dashboard</span>
         </a>
         <a routerLink="/patient-portal" routerLinkActive="active" (click)="toggleMobileMenu()">
           <i class="pi pi-user"></i>
           <span>My Portal</span>
         </a>
+      </ng-container>
+
+      <!-- Practitioner Mobile Links -->
+      <ng-container *ngIf="auth.hasRole(Roles.Practitioner)">
+        <a routerLink="/practitioner-portal" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <i class="pi pi-home"></i>
+          <span>Dashboard</span>
+        </a>
+        
+        <div class="mobile-group-title">Clinical</div>
+        <a routerLink="/patients" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <i class="pi pi-users"></i>
+          <span>Patients</span>
+        </a>
         <a routerLink="/appointments" routerLinkActive="active" (click)="toggleMobileMenu()">
           <i class="pi pi-calendar"></i>
           <span>Appointments</span>
-        </a>
-        <a *ngIf="auth.hasRole(Roles.Practitioner)" routerLink="/practitioners" routerLinkActive="active" (click)="toggleMobileMenu()">
-          <i class="pi pi-user-plus"></i>
-          <span>Practitioners</span>
         </a>
         <a routerLink="/observations" routerLinkActive="active" (click)="toggleMobileMenu()">
           <i class="pi pi-chart-line"></i>
@@ -71,14 +103,30 @@
           <i class="pi pi-check-circle"></i>
           <span>Consents</span>
         </a>
-        <a routerLink="/organizations" routerLinkActive="active" (click)="toggleMobileMenu()">
-          <i class="pi pi-building"></i>
-          <span>Organizations</span>
+        <a routerLink="/medication-requests" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <i class="pi pi-prescription"></i>
+          <span>Medication Requests</span>
         </a>
         <a routerLink="/diagnostic-reports" routerLinkActive="active" (click)="toggleMobileMenu()">
           <i class="pi pi-file"></i>
           <span>Reports</span>
         </a>
+
+        <div class="mobile-group-title">Management</div>
+        <a routerLink="/practitioners" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <i class="pi pi-user-plus"></i>
+          <span>Practitioners</span>
+        </a>
+        <a routerLink="/organizations" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <i class="pi pi-building"></i>
+          <span>Organizations</span>
+        </a>
+        <a routerLink="/locations" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <i class="pi pi-map-marker"></i>
+          <span>Locations</span>
+        </a>
+
+        <div class="mobile-group-title">Finance</div>
         <a routerLink="/invoices" routerLinkActive="active" (click)="toggleMobileMenu()">
           <i class="pi pi-dollar"></i>
           <span>Invoices</span>
@@ -87,19 +135,15 @@
           <i class="pi pi-check"></i>
           <span>Coverages</span>
         </a>
-        <a routerLink="/medication-requests" routerLinkActive="active" (click)="toggleMobileMenu()">
-          <i class="pi pi-prescription"></i>
-          <span>Medication Requests</span>
-        </a>
-      </div>
-      <div class="mobile-nav-footer">
-        <button *ngIf="!auth.isLoggedIn()" (click)="auth.login(); toggleMobileMenu()"
-          class="btn btn-primary">Login</button>
-        <button *ngIf="auth.isLoggedIn()" (click)="auth.logout(); toggleMobileMenu()"
-          class="btn btn-outline">Logout</button>
-      </div>
-    </nav>
-  </header>
+      </ng-container>
+    </div>
+    <div class="mobile-nav-footer">
+      <button *ngIf="!auth.isLoggedIn()" (click)="auth.login(); toggleMobileMenu()"
+        class="btn btn-primary">Login</button>
+      <button *ngIf="auth.isLoggedIn()" (click)="auth.logout(); toggleMobileMenu()"
+        class="btn btn-outline">Logout</button>
+    </div>
+  </nav>
 
   <main class="main-content">
     <router-outlet></router-outlet>
@@ -154,12 +198,7 @@
     height: 100%;
     flex: 1;
     justify-content: center;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  .desktop-nav::-webkit-scrollbar {
-    display: none;
+    align-items: center;
   }
 
   .desktop-nav a {
@@ -183,6 +222,63 @@
   .desktop-nav a.active {
     color: var(--primary-color);
     border-bottom-color: var(--primary-color);
+  }
+
+  /* Dropdown Styles */
+  .nav-group {
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: center;
+  }
+
+  .nav-group-btn {
+    background: none;
+    border: none;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 100%;
+    padding: 0 4px;
+  }
+
+  .nav-group-btn:hover {
+    color: var(--primary-color);
+  }
+
+  .nav-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    min-width: 200px;
+    box-shadow: var(--shadow-md);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    padding: 8px 0;
+    z-index: 1002;
+  }
+
+  .nav-group:hover .nav-dropdown {
+    display: block;
+  }
+
+  .nav-dropdown a {
+    height: auto;
+    padding: 10px 16px;
+    border-bottom: none;
+    color: var(--text-main);
+  }
+
+  .nav-dropdown a:hover {
+    background-color: var(--neutral-bg);
+    color: var(--primary-color);
   }
 
   .desktop-actions {
@@ -215,7 +311,7 @@
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.5);
-    z-index: 999;
+    z-index: 1100;
     opacity: 0;
     transition: opacity 0.3s;
   }
@@ -234,7 +330,7 @@
     height: 100vh;
     background: white;
     box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
-    z-index: 1001;
+    z-index: 1101;
     transition: right 0.3s ease-in-out;
     flex-direction: column;
   }
@@ -276,6 +372,15 @@
     flex: 1;
     overflow-y: auto;
     padding: var(--spacing-md) 0;
+  }
+
+  .mobile-group-title {
+    padding: 16px 24px 8px;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 600;
+    letter-spacing: 0.05em;
   }
 
   .mobile-nav-links a {
