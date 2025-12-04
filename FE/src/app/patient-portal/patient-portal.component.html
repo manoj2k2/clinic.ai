@@ -14,7 +14,7 @@
         <div class="content-card">
             <div class="card-header-flex">
                 <h4>My Appointments</h4>
-                <button routerLink="/appointments" class="btn btn-sm btn-primary">
+                <button routerLink="/appointments/new" class="btn btn-sm btn-primary">
                     <i class="pi pi-plus"></i> Book Visit
                 </button>
             </div>
@@ -24,73 +24,115 @@
             </div>
 
             <div class="appointment-list">
-                <div *ngFor="let apt of appointments" class="apt-item" (click)="selectAppointment(apt)" [class.selected]="selectedAppointment === apt" tabindex="0" role="button">
-                    <div class="apt-date-box">
-                        <span class="day">{{ apt.start | date:'d' }}</span>
-                        <span class="month">{{ apt.start | date:'MMM' }}</span>
-                    </div>
-                    <div class="apt-info">
-                        <div style="display:flex; align-items:center; gap:12px">
-                            <span class="apt-time">{{ apt.start | date:'shortTime' }}</span>
-                            <span class="apt-desc">{{ apt.description || 'Consultation' }}</span>
+                <div class="appointments-section">
+                    <div class="section-title" style="margin-bottom:8px">Upcoming</div>
+                    <div *ngIf="upcomingAppointments.length === 0" class="empty-state-sm">You have no upcoming appointments.</div>
+                    <div *ngFor="let apt of upcomingAppointments" class="apt-item" (click)="selectAppointment(apt)" [class.selected]="selectedAppointment === apt" tabindex="0" role="button">
+                        <div class="apt-date-box">
+                            <span class="day">{{ apt.start | date:'d' }}</span>
+                            <span class="month">{{ apt.start | date:'MMM' }}</span>
                         </div>
-                        <div style="display:flex; gap:8px; align-items:center; margin-top:6px">
-                            <span *ngIf="apt.practitioners?.length" class="apt-practitioner">with {{ apt.practitioners.join(', ') }}</span>
-                            <span class="apt-status" [class]="apt.status">{{ apt.status }}</span>
+                        <div class="apt-info">
+                            <div style="display:flex; align-items:center; gap:12px">
+                                <span class="apt-time">{{ apt.start | date:'shortTime' }}</span>
+                                <span class="apt-desc">{{ apt.description || 'Consultation' }}</span>
+                            </div>
+                            <div style="display:flex; gap:8px; align-items:center; margin-top:6px">
+                                <span *ngIf="apt.practitioners?.length" class="apt-practitioner">with {{ apt.practitioners.join(', ') }}</span>
+                                <span class="apt-status" [class]="apt.status">{{ apt.status }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>023 
+
+                <div class="appointments-section" style="margin-top:16px">
+                    <div class="section-title" style="margin-bottom:8px">Past</div>
+                    <div *ngIf="pastAppointments.length === 0" class="empty-state-sm">No past appointments.</div>
+                    <div *ngFor="let apt of pastAppointments" class="apt-item" (click)="selectAppointment(apt)" tabindex="0" role="button">
+                        <div class="apt-date-box">
+                            <span class="day">{{ apt.start | date:'d' }}</span>
+                            <span class="month">{{ apt.start | date:'MMM' }}</span>
+                        </div>
+                        <div class="apt-info">
+                            <div style="display:flex; align-items:center; gap:12px">
+                                <span class="apt-time">{{ apt.start | date:'shortTime' }}</span>
+                                <span class="apt-desc">{{ apt.description || 'Consultation' }}</span>
+                            </div>
+                            <div style="display:flex; gap:8px; align-items:center; margin-top:6px">
+                                <span *ngIf="apt.practitioners?.length" class="apt-practitioner">with {{ apt.practitioners.join(', ') }}</span>
+                                <span class="apt-status" [class]="apt.status">{{ apt.status }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <div *ngIf="selectedAppointment" class="content-card" style="margin-top:12px;">
-                <div class="card-header-flex">
-                    <h4>Appointment Details</h4>
+            
+        </div>
+
+        <!-- Selected Appointment -->
+        <div class="appointment-panel">
+            <div class="card-header-flex">
+                <h4>Appointment</h4>
+            </div>
+
+            <div *ngIf="!selectedAppointment" class="empty-state-sm">Select an appointment to view details.</div>
+
+            <div *ngIf="selectedAppointment" class="appointment-details">
+                <div class="details-header">
                     <div>
-                        <button class="btn btn-sm btn-outline" (click)="clearSelection()">Close</button>
+                        <div class="apt-title">{{ selectedAppointment.description || 'Consultation' }}</div>
+                        <div class="apt-time">{{ selectedAppointment.start | date:'fullDate' }} · {{ selectedAppointment.start | date:'shortTime' }}</div>
+                    </div>
+                    <div class="details-actions">
+                            <span class="apt-status" [class]="selectedAppointment.status">{{ selectedAppointment.status }}</span>
+                            <div style="display:flex; gap:8px; align-items:center">
+                                <button *ngIf="isFuture(selectedAppointment) && auth.hasRole(Roles.Patient) && !rescheduleMode" class="btn btn-sm btn-primary" (click)="startReschedule()">Reschedule</button>
+                                <button *ngIf="isFuture(selectedAppointment) && auth.hasRole(Roles.Patient)" class="btn btn-sm btn-outline" (click)="cancelAppointment(selectedAppointment)">Cancel</button>
+                                <button class="btn btn-sm btn-outline" (click)="clearSelection()">Close</button>
+                            </div>
                     </div>
                 </div>
 
-                <div style="margin-top:12px; display:flex; gap:16px; align-items:flex-start;">
-                    <div style="min-width:120px;">
-                        <div class="apt-date-box" style="width:100px;height:100px;">
-                            <div style="text-align:center;margin-top:10px">
-                                <div class="day" style="font-size:28px">{{ selectedAppointment.start | date:'d' }}</div>
-                                <div class="month" style="font-size:12px">{{ selectedAppointment.start | date:'MMM' }}</div>
-                            </div>
+                <div class="apt-details">
+                    <aside class="apt-details-left">
+                        <div class="apt-date-box large">
+                            <div class="day">{{ selectedAppointment.start | date:'d' }}</div>
+                            <div class="month">{{ selectedAppointment.start | date:'MMM' }}</div>
                         </div>
-                    </div>
-                    <div style="flex:1">
-                        <div style="display:flex; justify-content:space-between; align-items:center">
-                            <div>
-                                <div style="font-weight:700">{{ selectedAppointment.description || 'Consultation' }}</div>
-                                <div class="apt-time" style="margin-top:6px">{{ selectedAppointment.start | date:'fullDate' }} · {{ selectedAppointment.start | date:'shortTime' }}</div>
-                            </div>
-                            <div>
-                                <span class="apt-status" [class]="selectedAppointment.status">{{ selectedAppointment.status }}</span>
-                            </div>
+                        <div class="apt-location">
+                            <div *ngIf="selectedAppointment.location?.length" class="label">Location</div>
+                            <div *ngIf="selectedAppointment.location?.length">{{ selectedAppointment.location?.[0]?.display || selectedAppointment.location?.[0]?.reference }}</div>
+                            <div *ngIf="!selectedAppointment.location?.length" class="text-secondary">No location specified</div>
                         </div>
+                    </aside>
 
-                        <div style="margin-top:12px">
-                            <div *ngIf="selectedAppointment.location?.length">
-                                <div style="font-weight:600">Location</div>
-                                <div>{{ selectedAppointment.location?.[0]?.display || selectedAppointment.location?.[0]?.reference }}</div>
-                            </div>
-                            <div *ngIf="!selectedAppointment.location?.length" style="color:var(--text-secondary)">No location specified</div>
-                        </div>
-
-                        <div style="margin-top:12px">
-                            <div style="font-weight:600">Practitioners</div>
+                    <section class="apt-details-main">
+                        <div class="practitioners-section">
+                            <div class="section-title">Practitioners</div>
                             <div *ngIf="getSelectedPractitioners().length === 0" class="text-secondary">No practitioner details available.</div>
-                            <div *ngFor="let pr of getSelectedPractitioners()" style="margin-top:8px">
-                                <app-practitioner-card [practitioner]="pr"></app-practitioner-card>
+                            <div class="practitioners-list">
+                                <div *ngFor="let pr of getSelectedPractitioners()" class="pr-card-wrap">
+                                    <app-practitioner-card [practitioner]="pr"></app-practitioner-card>
+                                </div>
+                                <div *ngIf="rescheduleMode" class="reschedule-form" style="margin-top:8px">
+                                    <label class="label">New date & time</label>
+                                    <div style="display:flex; gap:8px; align-items:center; margin-top:6px">
+                                        <input type="datetime-local" [(ngModel)]="rescheduleValue" />
+                                        <button class="btn btn-sm btn-primary" (click)="submitReschedule()">Save</button>
+                                        <button class="btn btn-sm btn-outline" (click)="cancelReschedule()">Cancel</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </section>
                 </div>
             </div>
         </div>
 
-        <!-- My Results -->
+      
+    </div>
+      <!-- My Results -->
         <div class="content-card">
             <div class="card-header-flex">
                 <h4>My Results</h4>
@@ -116,7 +158,6 @@
             </div>
         </div>
 
-    </div>
 </div>
 
 <style>
@@ -209,6 +250,30 @@
         text-transform: uppercase;
         color: var(--text-secondary);
         font-weight: 600;
+    }
+
+    /* Appointment details panel */
+    .appointment-panel { margin-top: 8px }
+    .appointment-details { margin-top:12px; display:flex; flex-direction:column; gap:12px }
+    .details-header { display:flex; justify-content:space-between; align-items:center }
+    .apt-title { font-weight:700; font-size:16px }
+    .details-actions { display:flex; align-items:center; gap:12px }
+
+    .apt-details { display:flex; gap:16px; align-items:flex-start }
+    .apt-details-left { min-width:120px; display:flex; flex-direction:column; gap:8px }
+    .apt-details-main { flex:1 }
+    .apt-date-box.large { width:100px; height:100px; display:flex; flex-direction:column; align-items:center; justify-content:center }
+    .apt-date-box.large .day { font-size:28px }
+    .apt-location { margin-top:8px; font-size:13px }
+    .section-title { font-weight:600; margin-bottom:8px }
+    .practitioners-list { display:flex; flex-direction:column; gap:8px }
+    .pr-card-wrap app-practitioner-card { display:block }
+
+    @media (max-width: 800px) {
+        .apt-details { flex-direction:column }
+        .apt-details-left { flex-direction:row; gap:12px; align-items:center }
+        .apt-date-box.large { width:72px; height:72px }
+        .details-header { flex-direction:column; align-items:flex-start; gap:8px }
     }
 
     .apt-info {

@@ -1,0 +1,109 @@
+<div class="page-container">
+  <div class="page-header">
+    <h3>Appointments</h3>
+    <button
+      type="button"
+      routerLink="/appointments/new"
+      class="btn btn-primary"
+    >
+      Create New Appointment
+    </button>
+  </div>
+  
+  <div class="search-bar" style="display:flex; gap:8px; align-items:center; margin:12px 0; flex-wrap: wrap;">
+    <app-resource-selector resourceType="Patient" placeholder="Search Patient..." (selectedId)="onPatientSelected($event)"></app-resource-selector>
+    <app-resource-selector resourceType="Practitioner" placeholder="Search Practitioner..." (selectedId)="onPractitionerSelected($event)"></app-resource-selector>
+    <button class="btn btn-sm btn-primary" (click)="doSearch()">Search</button>
+    <button class="btn btn-sm btn-outline" (click)="clearSearch()">Clear</button>
+    
+    <div class="view-switcher" style="margin-left: auto; display: flex; gap: 4px;">
+      <button class="btn btn-sm" [class.btn-primary]="viewMode === 'table'" [class.btn-outline]="viewMode !== 'table'" (click)="viewMode = 'table'">Table</button>
+      <button class="btn btn-sm" [class.btn-primary]="viewMode === 'calendar'" [class.btn-outline]="viewMode !== 'calendar'" (click)="viewMode = 'calendar'">Calendar</button>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading">Loading...</div>
+  <div *ngIf="error" class="error-msg">{{ error }}</div>
+
+  <!-- Table View -->
+  <div *ngIf="!loading && viewMode === 'table'" class="table-container">
+    <p-table [value]="appointments || []" [tableStyle]="{ 'min-width': '50rem' }" *ngIf="appointments?.length; else none">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Status</th>
+          <th>Start</th>
+          <th>Duration</th>
+          <th>Patient</th>
+          <th>Practitioner</th>
+          <th>Service</th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-appt>
+        <tr>
+          <td>
+            <span class="badge" [ngClass]="{
+              'badge-success': appt.resource?.status === 'booked',
+              'badge-warning': appt.resource?.status === 'pending' || appt.resource?.status === 'proposed',
+              'badge-neutral': appt.resource?.status === 'arrived' || appt.resource?.status === 'checked-in',
+              'badge-danger': appt.resource?.status === 'cancelled' || appt.resource?.status === 'noshow'
+            }">{{appt.resource?.status}}</span>
+          </td>
+          <td>{{appt.resource?.start | date:'short'}}</td>
+          <td>{{appt.resource?.minutesDuration ? appt.resource?.minutesDuration + ' min' : '-'}}</td>
+          <td>{{appt.resource?.subject?.reference || '-'}}</td>
+          <td>
+            <ng-container *ngFor="let p of appt.resource?.participant">
+              <span *ngIf="p.actor?.reference?.startsWith('Practitioner')">{{p.actor.reference}} </span>
+            </ng-container>
+          </td>
+          <td>{{appt.resource?.serviceType?.[0]?.concept?.text || appt.resource?.serviceType?.[0]?.concept?.coding?.[0]?.display || '-'}}</td>
+          <td>
+            <button type="button" [routerLink]="['/appointments', appt.resource?.id]" class="btn btn-sm btn-outline">Edit</button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <!-- Calendar View -->
+  <div *ngIf="!loading && viewMode === 'calendar'" class="calendar-container">
+    <div class="calendar-header" style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-bottom: 16px;">
+        <button class="btn btn-sm btn-outline" (click)="prevWeek()">&lt; Prev Week</button>
+        <span style="font-weight: bold; font-size: 1.1em;">
+            {{weekDays[0] | date:'mediumDate'}} - {{weekDays[6] | date:'mediumDate'}}
+        </span>
+        <button class="btn btn-sm btn-outline" (click)="nextWeek()">Next Week &gt;</button>
+    </div>
+
+    <div class="calendar-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;">
+        <!-- Day Headers -->
+        <div *ngFor="let day of weekDays" class="calendar-day-header" style="text-align: center; font-weight: bold; padding: 8px; background: #f5f5f5; border-radius: 4px;">
+            <div>{{day | date:'EEE'}}</div>
+            <div>{{day | date:'d'}}</div>
+        </div>
+
+        <!-- Day Columns -->
+        <div *ngFor="let day of weekDays" class="calendar-day-column" style="min-height: 400px; background: #fafafa; border: 1px solid #eee; border-radius: 4px; padding: 4px;">
+            <div *ngFor="let appt of getAppointmentsForDay(day)" class="calendar-event" [routerLink]="['/appointments', appt.resource?.id]" 
+                 style="background: white; border: 1px solid #ddd; padding: 4px; margin-bottom: 4px; border-radius: 4px; cursor: pointer; font-size: 0.85em; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                <div style="font-weight: bold; color: #333;">{{appt.resource?.start | date:'shortTime'}}</div>
+                <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{appt.resource?.subject?.reference}}</div>
+                <div class="badge badge-sm" [ngClass]="{
+                    'badge-success': appt.resource?.status === 'booked',
+                    'badge-warning': appt.resource?.status === 'pending',
+                    'badge-neutral': appt.resource?.status === 'arrived',
+                    'badge-danger': appt.resource?.status === 'cancelled'
+                  }" style="font-size: 0.7em; padding: 2px 4px;">{{appt.resource?.status}}</div>
+            </div>
+            <div *ngIf="getAppointmentsForDay(day).length === 0" style="text-align: center; color: #999; font-size: 0.8em; margin-top: 20px;">
+                No appts
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <ng-template #none>
+    <div class="empty-state" *ngIf="!loading && viewMode === 'table'">No appointments found.</div>
+  </ng-template>
+</div>

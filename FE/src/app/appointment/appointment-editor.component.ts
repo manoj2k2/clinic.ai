@@ -4,175 +4,7 @@ import { FhirService } from '../services/fhir.service';
 
 @Component({
     selector: 'app-appointment-editor',
-    template: `
-  <div class="editor-container">
-    <div class="editor-card">
-      <div class="page-header">
-        <h2 *ngIf="isNew">Create Appointment</h2>
-        <h2 *ngIf="!isNew">Edit Appointment</h2>
-      </div>
-
-      <div *ngIf="loading" class="loading">Loading...</div>
-      <div *ngIf="error" class="error-msg">{{error}}</div>
-
-      <form *ngIf="!loading" (ngSubmit)="save()">
-        
-        <div class="form-section">
-          <div class="form-section-title">Basic Information</div>
-          <div class="form-row">
-            <div class="form-field">
-              <label>Status</label>
-              <select [(ngModel)]="status" name="status">
-                <option value="proposed">Proposed</option>
-                <option value="pending">Pending</option>
-                <option value="booked">Booked</option>
-                <option value="arrived">Arrived</option>
-                <option value="fulfilled">Fulfilled</option>
-                <option value="cancelled">Cancelled</option>
-                <option value="noshow">No Show</option>
-                <option value="checked-in">Checked In</option>
-              </select>
-            </div>
-            <div class="form-field">
-              <label>Priority</label>
-              <select [(ngModel)]="priorityCode" name="priorityCode" (change)="onPriorityChange()">
-                <option value="">-- Select Priority --</option>
-                <option *ngFor="let p of priorityOptions" [value]="p.code">{{p.display}}</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-field">
-            <label>Description</label>
-            <input type="text" [(ngModel)]="description" name="description" placeholder="Brief description of the appointment" />
-          </div>
-
-          <div class="form-field">
-            <label>Subject Reference (Patient)</label>
-              <app-resource-selector resourceType="Patient"
-               placeholder="Search Patient"
-                (selectedId)="onPatientSelected($event)"></app-resource-selector>
-              <div *ngIf="subjectRef" >Selected: {{subjectRef}}</div>
-          </div>
-        </div>
-
-        <div class="form-section">
-          <div class="form-section-title">Service Details</div>
-          <div class="form-row">
-            <div class="form-field">
-              <label>Service Category</label>
-              <select [(ngModel)]="serviceCategoryCode" name="serviceCategoryCode" (change)="onServiceCategoryChange()">
-                <option value="">-- Select Category --</option>
-                <option *ngFor="let cat of serviceCategoryOptions" [value]="cat.code">{{cat.display}}</option>
-              </select>
-            </div>
-            <div class="form-field">
-              <label>Appointment Type</label>
-              <select [(ngModel)]="appointmentTypeCode" name="appointmentTypeCode" (change)="onAppointmentTypeChange()">
-                <option value="">-- Select Type --</option>
-                <option *ngFor="let type of appointmentTypeOptions" [value]="type.code">{{type.display}}</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-field">
-            <label>Service Type</label>
-            <input type="text" [(ngModel)]="serviceTypeText" name="serviceTypeText" placeholder="e.g., General Checkup" />
-          </div>
-
-          <div class="form-field">
-            <label>Specialty</label>
-            <input type="text" [(ngModel)]="specialtyText" name="specialtyText" placeholder="e.g., Cardiology" />
-          </div>
-        </div>
-
-        <div class="form-section">
-          <div class="form-section-title">Timing</div>
-          <div class="form-row">
-            <div class="form-field">
-              <label>Start Date/Time</label>
-              <input type="datetime-local" [(ngModel)]="start" name="start" />
-            </div>
-            <div class="form-field">
-              <label>End Date/Time</label>
-              <input type="datetime-local" [(ngModel)]="end" name="end" />
-            </div>
-          </div>
-
-          <div class="form-field">
-            <label>Duration (minutes)</label>
-            <input type="number" [(ngModel)]="minutesDuration" name="minutesDuration" placeholder="30" />
-          </div>
-
-          <div class="form-field">
-            <label>Created Date</label>
-            <input type="datetime-local" [(ngModel)]="created" name="created" />
-          </div>
-        </div>
-
-        <div class="form-section">
-          <div class="form-section-title">Participants</div>
-          <div *ngFor="let participant of participants; let i = index" style="border: 1px solid var(--border-color); padding: 12px; border-radius: 6px; margin-bottom: 12px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <strong>Participant {{i + 1}}</strong>
-              <button type="button" (click)="removeParticipant(i)" class="btn btn-sm btn-danger">Remove</button>
-            </div>
-            <div class="form-row">
-              <div class="form-field">
-                <label>Actor Reference</label>
-                <app-resource-selector resourceType="Practitioner" [name]="'actorRef' + i"
-                 placeholder="Search Practitioner or Location"
-                  (selectedId)="onParticipantSelected($event, i)"></app-resource-selector>
-                  <div *ngIf="participant.actorRef" >Selected: {{participant.actorRef}}</div>
-              </div>
-              <div class="form-field">
-                <label>Status</label>
-                <select [(ngModel)]="participant.status" [name]="'participantStatus' + i">
-                  <option value="accepted">Accepted</option>
-                  <option value="declined">Declined</option>
-                  <option value="tentative">Tentative</option>
-                  <option value="needs-action">Needs Action</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-field">
-              <label>Required</label>
-              <select [(ngModel)]="participant.required" [name]="'required' + i">
-                <option [value]="true">Yes</option>
-                <option [value]="false">No</option>
-              </select>
-            </div>
-          </div>
-          <button type="button" (click)="addParticipant()" class="btn btn-secondary">Add Participant</button>
-        </div>
-
-        <div class="form-section">
-          <div class="form-section-title">Additional Information</div>
-          <div class="form-field">
-            <label>Reason</label>
-            <input type="text" [(ngModel)]="reasonText" name="reasonText" placeholder="Reason for appointment" />
-          </div>
-
-          <div class="form-field">
-            <label>Notes</label>
-            <textarea [(ngModel)]="note" name="note" rows="3" placeholder="Additional notes..."></textarea>
-          </div>
-
-          <div class="form-field">
-            <label>Patient Instructions</label>
-            <textarea [(ngModel)]="patientInstruction" name="patientInstruction" rows="2" placeholder="Instructions for the patient..."></textarea>
-          </div>
-        </div>
-
-        <div class="actions" style="display:flex; justify-content:flex-end; gap:12px; margin-top:24px">
-          <button type="button" (click)="cancel()" class="btn btn-secondary">Cancel</button>
-          <button *ngIf="!isNew" type="button" (click)="remove()" class="btn btn-danger">Delete</button>
-          <button type="submit" class="btn btn-primary">Save</button>
-        </div>
-      </form>
-    </div>
-  </div>
-  `,
+    templateUrl: './appointment-editor.component.html',
     styles: []
 })
 export class AppointmentEditorComponent implements OnInit {
@@ -196,6 +28,7 @@ export class AppointmentEditorComponent implements OnInit {
     specialtyText = '';
 
     start = '';
+    // keep end to start + minutesDuration  
     end = '';
     minutesDuration = 30;
     created = '';
@@ -338,6 +171,16 @@ export class AppointmentEditorComponent implements OnInit {
 
     removeParticipant(index: number) {
         this.participants.splice(index, 1);
+    }
+
+    updateEndTime() {
+        if (!this.start) return;
+        const startDate = new Date(this.start);
+        const endDate = new Date(startDate.getTime() + this.minutesDuration * 60000);
+        // Adjust for timezone offset to keep the local time string correct
+        const tzOffset = endDate.getTimezoneOffset() * 60000;
+        const localEndDate = new Date(endDate.getTime() - tzOffset);
+        this.end = localEndDate.toISOString().slice(0, 16);
     }
 
     save() {

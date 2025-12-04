@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FhirService } from '../services/fhir.service';
 import { forkJoin } from 'rxjs';
 import { AuthService } from '../services/auth.service';
+import { Roles } from '../services/roles';
 
 @Component({
   selector: 'app-patient-portal',
@@ -11,12 +12,18 @@ import { AuthService } from '../services/auth.service';
 export class PatientPortalComponent implements OnInit {
   patient: any = 1;
   appointments: any[] = [];
+  upcomingAppointments: any[] = [];
+  pastAppointments: any[] = [];
   results: any[] = [];
   practitionerMap: { [id: string]: string } = {};
   practitionerResources: { [id: string]: any } = {};
   selectedAppointment: any | null = null;
   loading = true;
   error: string | null = null;
+  // reschedule state
+  rescheduleMode = false;
+  rescheduleValue: string | null = null; // value for input[type=datetime-local]
+  public Roles = Roles;
 
   constructor(
     private fhir: FhirService,
@@ -59,6 +66,8 @@ export class PatientPortalComponent implements OnInit {
         .map((e: any) => e.resource)
         .filter((a: any) => a.status !== 'cancelled')
         .sort((a: any, b: any) => new Date(a.start).getTime() - new Date(b.start).getTime());
+
+      this.groupAppointments();
 
       // collect referenced practitioner ids and load their details
       const ids = new Set<string>();
@@ -105,12 +114,77 @@ export class PatientPortalComponent implements OnInit {
     });
   }
 
+  private groupAppointments() {
+    const now = Date.now();
+    this.upcomingAppointments = this.appointments.filter(a => {
+      try { return a.start && new Date(a.start).getTime() >= now; } catch { return false; }
+    }).sort((a,b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+
+    this.pastAppointments = this.appointments.filter(a => {
+      try { return a.start && new Date(a.start).getTime() < now; } catch { return false; }
+    }).sort((a,b) => new Date(b.start).getTime() - new Date(a.start).getTime());
+  }
+
   selectAppointment(apt: any) {
     this.selectedAppointment = apt;
   }
 
   clearSelection() {
     this.selectedAppointment = null;
+  }
+
+  isFuture(apt: any): boolean {
+    if (!apt?.start) { return false; }
+    try { return new Date(apt.start).getTime() > Date.now(); } catch { return false; }
+  }
+
+  cancelAppointment(apt: any) {
+    if (!apt || !apt.id) { return; }
+    if (!confirm('Cancel this appointment? This cannot be undone.')) { return; }
+    const id = apt.id;
+    const updated = { ...apt, status: 'cancelled', id };
+    this.fhir.updateAppointment(id, updated).subscribe({ next: () => {
+      // refresh list and clear selection
+      if (this.patient?.id) { this.fetchMyRecords(this.patient.id); }
+      this.clearSelection();
+    }, error: () => {
+      alert('Failed to cancel appointment.');
+    }});
+  }
+
+  startReschedule() {
+    if (!this.selectedAppointment) { return; }
+    this.rescheduleMode = true;
+    const dt = this.selectedAppointment.start ? new Date(this.selectedAppointment.start) : new Date();
+    // prepare value for datetime-local input (YYYY-MM-DDTHH:mm)
+    const local = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000).toISOString().slice(0,16);
+    this.rescheduleValue = local;
+  }
+
+  cancelReschedule() {
+    this.rescheduleMode = false;
+    this.rescheduleValue = null;
+  }
+
+  submitReschedule() {
+    if (!this.selectedAppointment || !this.rescheduleValue) { return; }
+    const id = this.selectedAppointment.id;
+    // convert local value to ISO string
+    const newDate = new Date(this.rescheduleValue as string);
+    const iso = newDate.toISOString();
+    const updated = { ...this.selectedAppointment, start: iso, id };
+    this.fhir.updateAppointment(id, updated).subscribe({ next: () => {
+      if (this.patient?.id) { this.fetchMyRecords(this.patient.id); }
+      this.rescheduleMode = false;
+      this.rescheduleValue = null;
+      // reselect updated appointment if present
+      setTimeout(() => {
+        const found = this.appointments.find(a => a.id === id);
+        if (found) { this.selectAppointment(found); }
+      }, 200);
+    }, error: () => {
+      alert('Failed to reschedule appointment.');
+    }});
   }
 
   getSelectedPractitioners(): any[] {
