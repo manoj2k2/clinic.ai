@@ -30,7 +30,6 @@
     <p-table [value]="appointments || []" [tableStyle]="{ 'min-width': '50rem' }" *ngIf="appointments?.length; else none">
       <ng-template pTemplate="header">
         <tr>
-          <th>ID</th>
           <th>Status</th>
           <th>Start</th>
           <th>Duration</th>
@@ -42,7 +41,6 @@
       </ng-template>
       <ng-template pTemplate="body" let-appt>
         <tr>
-          <td>{{appt.resource?.id}}</td>
           <td>
             <span class="badge" [ngClass]="{
               'badge-success': appt.resource?.status === 'booked',
