@@ -8,6 +8,8 @@ import { AppointmentEditorComponent } from './appointment-editor.component';
 import { SharedModule } from '../common/shared.module';
 
 
+import { TableModule } from 'primeng/table';
+
 @NgModule({
     declarations: [
         AppointmentListComponent,
@@ -17,7 +19,8 @@ import { SharedModule } from '../common/shared.module';
         CommonModule,
         FormsModule,
         RouterModule,
-        SharedModule
+        SharedModule,
+        TableModule
     ],
     exports: [
         AppointmentListComponent,
