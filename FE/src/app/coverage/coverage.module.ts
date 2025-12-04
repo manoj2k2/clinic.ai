@@ -5,6 +5,8 @@ import { RouterModule } from '@angular/router';
 
 import { CoverageListComponent } from './coverage-list.component';
 import { CoverageEditorComponent } from './coverage-editor.component';
+import { InputTextModule } from 'primeng/inputtext';
+import { CheckboxModule } from 'primeng/checkbox';
 
 @NgModule({
     declarations: [
@@ -15,6 +17,9 @@ import { CoverageEditorComponent } from './coverage-editor.component';
         CommonModule,
         FormsModule,
         RouterModule
+        ,
+        InputTextModule,
+        CheckboxModule
     ],
     exports: [
         CoverageListComponent,
