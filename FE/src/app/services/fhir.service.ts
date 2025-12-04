@@ -208,6 +208,19 @@ export class FhirService {
     const q = parts.length ? `?${parts.join('&')}` : '';
     return this.http.get(`/fhir/Appointment${q}`);
   }
+  /**
+   * Generic patient search. Pass an object with keys matching FHIR search params
+   * e.g. { name: 'Smith' } or { identifier: '12345' }
+   */
+  searchPatients(params: { [k: string]: string } ): Observable<any> {
+    const parts: string[] = [];
+    for (const k of Object.keys(params || {})) {
+      const v = params[k];
+      if (v) { parts.push(`${encodeURIComponent(k)}=${encodeURIComponent(v)}`); }
+    }
+    const q = parts.length ? `?${parts.join('&')}` : '';
+    return this.http.get(`/fhir/Patient${q}`);
+  }
   // MedicationRequest
   getMedicationRequests(): Observable<any> {
     return this.http.get('/fhir/MedicationRequest');

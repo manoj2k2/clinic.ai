@@ -9,6 +9,7 @@ import { PatientObservationListComponent } from './patient-observation-list.comp
 
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { EhicScannerComponent } from './ehic-scanner/ehic-scanner.component';
+import { TableModule } from 'primeng/table';
 
 @NgModule({
   declarations: [
@@ -22,7 +23,8 @@ import { EhicScannerComponent } from './ehic-scanner/ehic-scanner.component';
     CommonModule, 
     FormsModule, 
     RouterModule,
-    ZXingScannerModule
+    ZXingScannerModule,
+    TableModule
   ],
   exports: [
     PatientListComponent, 
