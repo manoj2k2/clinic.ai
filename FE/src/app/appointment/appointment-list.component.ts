@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FhirService } from '../services/fhir.service';
 
 @Component({
@@ -8,6 +8,12 @@ import { FhirService } from '../services/fhir.service';
     <div class="page-header">
       <h3>Appointments</h3>
       <button type="button" routerLink="/appointments/new" class="btn btn-primary">Create New Appointment</button>
+    </div>
+    <div class="search-bar" style="display:flex; gap:8px; align-items:center; margin:12px 0">
+      <input class="input" placeholder="Patient (Patient/{id} or identifier)" [(ngModel)]="searchPatientInput" />
+      <input class="input" placeholder="Practitioner (Practitioner/{id})" [(ngModel)]="searchPractitionerInput" />
+      <button class="btn btn-sm btn-primary" (click)="doSearch()">Search</button>
+      <button class="btn btn-sm btn-outline" (click)="clearSearch()">Clear</button>
     </div>
 
     <div *ngIf="loading" class="loading">Loading...</div>
@@ -59,12 +65,18 @@ export class AppointmentListComponent implements OnInit {
     appointments: any[] | null = null;
     loading = false;
     error: string | null = null;
+    @Input() patientRef: string | null = null;
+    @Input() practitionerRef: string | null = null;
+  // UI search inputs
+  searchPatientInput: string | null = null;
+  searchPractitionerInput: string | null = null;
 
     constructor(private fhir: FhirService) { }
-
-    ngOnInit(): void {
+    
+    // implementation for searching by patient or practitioner reference can be added here in the future
+    searchByPatientRef(patientRef: string): void {
         this.loading = true;
-        this.fhir.getAppointments().subscribe({
+        this.fhir.searchAppointmentsByPatientRef(patientRef).subscribe({
             next: (res: any) => {
                 this.appointments = res.entry || [];
                 this.loading = false;
@@ -74,5 +86,71 @@ export class AppointmentListComponent implements OnInit {
                 this.loading = false;
             }
         });
+    }
+    searchByPractitionerRef(practitionerRef: string): void {
+        this.loading = true;
+        this.fhir.searchAppointmentsByPractitionerRef(practitionerRef).subscribe({
+            next: (res: any) => {
+                this.appointments = res.entry || [];
+                this.loading = false;
+            },
+            error: (e) => {
+                this.error = e.message || 'Failed';
+                this.loading = false;
+            }
+        });
+    }
+
+    ngOnInit(): void {
+        this.loading = true;
+      // If a patient or practitioner reference was supplied as an input, use the FHIR search URL
+      if (this.patientRef || this.practitionerRef) {
+        const params: { [k: string]: string } = {};
+        if (this.patientRef) { params['patient'] = this.patientRef; }
+        if (this.practitionerRef) { params['practitioner'] = this.practitionerRef; }
+        this.fhir.searchAppointments(params).subscribe({ next: (res: any) => {
+          this.appointments = res.entry || [];
+          this.loading = false;
+        }, error: (e) => {
+          this.error = e.message || 'Failed';
+          this.loading = false;
+        }});
+        return;
+      }
+
+      this.fhir.getAppointments().subscribe({
+        next: (res: any) => {
+          this.appointments = res.entry || [];
+          this.loading = false;
+        },
+        error: (e) => {
+          this.error = e.message || 'Failed';
+          this.loading = false;
+        }
+      });
+    }
+
+    doSearch(): void {
+      this.loading = true;
+      const params: { [k: string]: string } = {};
+      if (this.searchPatientInput) { params['patient'] = this.searchPatientInput; }
+      if (this.searchPractitionerInput) { params['practitioner'] = this.searchPractitionerInput; }
+      if (Object.keys(params).length === 0) {
+        // nothing entered, load all
+        this.fhir.getAppointments().subscribe({ next: (res: any) => { this.appointments = res.entry || []; this.loading = false; }, error: (e) => { this.error = e.message || 'Failed'; this.loading = false; } });
+        return;
+      }
+
+      this.fhir.searchAppointments(params).subscribe({ next: (res: any) => {
+        this.appointments = res.entry || [];
+        this.loading = false;
+      }, error: (e) => { this.error = e.message || 'Failed'; this.loading = false; } });
+    }
+
+    clearSearch(): void {
+      this.searchPatientInput = null;
+      this.searchPractitionerInput = null;
+      this.loading = true;
+      this.fhir.getAppointments().subscribe({ next: (res: any) => { this.appointments = res.entry || []; this.loading = false; }, error: (e) => { this.error = e.message || 'Failed'; this.loading = false; } });
     }
 }

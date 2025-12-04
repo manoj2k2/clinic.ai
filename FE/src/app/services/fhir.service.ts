@@ -189,6 +189,25 @@ export class FhirService {
     return this.http.delete(`/fhir/Appointment/${id}`);
   }
 
+  searchAppointmentsByPatientRef(patientRef: string): Observable<any> {
+    return this.http.get(`/fhir/Appointment?patient=${patientRef}`);
+  } 
+  searchAppointmentsByPractitionerRef(practitionerRef: string): Observable<any> {
+    return this.http.get(`/fhir/Appointment?practitioner=${practitionerRef}`);
+  }  
+  /**
+   * Generic appointment search. Pass an object with keys matching FHIR search params
+   * e.g. { patient: 'Patient/123', practitioner: 'Practitioner/456' }
+   */
+  searchAppointments(params: { [k: string]: string } ): Observable<any> {
+    const parts: string[] = [];
+    for (const k of Object.keys(params || {})) {
+      const v = params[k];
+      if (v) { parts.push(`${encodeURIComponent(k)}=${encodeURIComponent(v)}`); }
+    }
+    const q = parts.length ? `?${parts.join('&')}` : '';
+    return this.http.get(`/fhir/Appointment${q}`);
+  }
   // MedicationRequest
   getMedicationRequests(): Observable<any> {
     return this.http.get('/fhir/MedicationRequest');
