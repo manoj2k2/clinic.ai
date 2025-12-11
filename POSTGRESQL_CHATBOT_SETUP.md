@@ -690,7 +690,7 @@ io.on("connection", async (socket) => {
   // Get or create conversation
   let conversationData = await ConversationModel.findBySessionId(sessionId);
   if (!conversationData) {
-    conversationData = await ConversationModel.create(sessionId);
+    conversationData = await ConversationModel.create(sessionId, 1);
   }
 
   socket.emit("connected", {

@@ -8,6 +8,8 @@ import { testConnection } from './database';
 import { ConversationModel } from './models/conversation.model';
 import { SessionService } from './services/session.service';
 import { chatWithAI, testAI, getProviderInfo } from './ai-provider';
+import { fhirClient } from './services/fhir-client.service';
+
 
 // Load environment variables
 dotenv.config();
@@ -48,7 +50,19 @@ async function startup() {
       console.warn('⚠️  AI provider test failed - check your API key');
     }
     
+    // Test FHIR server connection
+    console.log('🧪 Testing FHIR server...');
+    const fhirHealthy = await fhirClient.healthCheck();
+    if (fhirHealthy) {
+      console.log('✅ FHIR server connected');
+      console.log(`   Base URL: ${process.env.FHIR_BASE_URL}`);
+    } else {
+      console.warn('⚠️  FHIR server not reachable - patient data features may not work');
+      console.warn(`   Check if HAPI FHIR server is running at ${process.env.FHIR_BASE_URL}`);
+    }
+    
     console.log('✅ All systems ready!');
+
   } catch (error) {
     console.error('❌ Startup failed:', error);
     process.exit(1);
@@ -83,8 +97,14 @@ app.get('/health', async (req, res) => {
 
 // Test chat page
 app.get('/test', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'test-chat.html'));
+  console.log('Test chat page requested');
+  res.sendFile(path.join(__dirname,'..', 'test-chat.html'));
 });
+
+app.get('/test-chat.html', (req, res) => {
+  console.log('Test chat page requested');
+  res.sendFile(path.join(__dirname, '..', 'test-chat.html'));
+}); 
 
 // Get conversation history
 app.get('/api/conversations/:sessionId', async (req, res) => {
