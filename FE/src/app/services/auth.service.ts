@@ -34,6 +34,21 @@ export class AuthService {
     return this.oauthService.getIdentityClaims();
   }
 
+  /**
+   * Get the patient ID (subject) of the logged-in user.
+   * This is typically the 'sub' claim from the identity token.
+   */
+  getPatientId(): string | null {
+    const claims = this.getIdentityClaims();
+    if (claims && claims.sub) {
+      const patientId = claims.sub;
+      // Store in sessionStorage for use in other windows/tabs
+      sessionStorage.setItem('patientId', patientId);
+      return patientId;
+    }
+    return null;
+  }
+
   private decodeJwt(token: string): any {
     try {
       const parts = token.split('.');

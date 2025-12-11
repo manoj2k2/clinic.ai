@@ -192,10 +192,43 @@
   </div>
 
   <script>
+    // Get patientId from logged-in user context
+    const getPatientId = () => {
+      // Try to get from sessionStorage (set by Angular app after login)
+      let patientId = sessionStorage.getItem('patientId');
+      if (patientId) return patientId;
+
+      // Try to get from localStorage
+      patientId = localStorage.getItem('patientId');
+      if (patientId) return patientId;
+
+      // Try to extract from access token (if available)
+      const accessToken = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+      if (accessToken) {
+        try {
+          const decoded = JSON.parse(atob(accessToken.split('.')[1]));
+          if (decoded.sub) return decoded.sub; // subject (user ID from OIDC)
+          if (decoded.preferred_username) return decoded.preferred_username;
+        } catch (e) {
+          console.warn('Could not decode token:', e);
+        }
+      }
+
+      // Fallback - this should not happen if user is properly logged in
+      console.warn('No patientId found - user may not be logged in');
+      return null;
+    };
+
+    const patientId = getPatientId();
+    if (!patientId) {
+      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:Arial;color:#666;"><div style="text-align:center;"><h2>⚠️ Authentication Required</h2><p>Please log in through the Clinic.AI portal first.</p><a href="/" style="color:#667eea;text-decoration:none;font-weight:bold;">← Back to Portal</a></div></div>';
+      throw new Error('User not authenticated');
+    }
+
     const socket = io('http://localhost:3001', {
       query: {
         sessionId: 'test-session-' + Date.now(),
-        patientId: 'patient-test-001'
+        patientId: patientId
       }
     });
     

@@ -30,9 +30,11 @@ import { LocationListComponent } from './location/location-list.component';
 import { LocationEditorComponent } from './location/location-editor.component';
 import { practitionerPortalDashboardComponent } from './practitioner-portal/practitioner-portal.component';
 import { PatientPortalComponent } from './patient-portal/patient-portal.component';
+import { ChatbotComponent } from './chatbot/chatbot.component';
 
 const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+  { path: 'chatbot', component: ChatbotComponent },
   { path: 'practitioner-portal', component: practitionerPortalDashboardComponent },
   { path: 'patient-portal', component: PatientPortalComponent },
   { path: 'patients', component: PatientListComponent },
