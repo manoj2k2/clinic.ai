@@ -1,25 +1,133 @@
 <div class="chat-wrapper">
   <div class="chat-container">
+    <!-- Chat Header with Patient Selector -->
     <div class="chat-header">
-      <h2>🤖 AI Medical Assistant</h2>
-      <div class="status" [class.connected]="isConnected" [class.disconnected]="!isConnected">
-        {{ isConnected ? '🟢 Connected' : '🔴 Disconnected' }}
-      </div>
-    </div>
+      <div class="header-content">
+        <h2>🤖 AI Medical Assistant</h2>
 
-    <div class="messages" #messagesContainer>
-      <div *ngIf="messages.length === 0" class="welcome-message">
-        <h3>👋 Welcome</h3>
-        <p>I'm your AI medical assistant. How can I help you today?</p>
-      </div>
+        <!-- Patient Selector -->
+        <div class="patient-selector" *ngIf="!isLoadingPatients">
+          <div
+            class="current-patient"
+            (click)="togglePatientSelector()"
+            [class.clickable]="canSwitchPatient()"
+          >
+            <span class="patient-icon">👤</span>
+            <span class="patient-name">{{ getCurrentPatientName() }}</span>
+            <span class="dropdown-arrow" *ngIf="canSwitchPatient()">▼</span>
+          </div>
 
-      <div *ngFor="let message of messages" [class.message]="true" [ngClass]="message.sender">
-        <div class="message-bubble">
-          <div class="message-content">{{ message.content }}</div>
-          <div class="message-time">{{ message.timestamp | date:'short' }}</div>
+          <!-- Dropdown Menu -->
+          <div
+            class="patient-dropdown"
+            *ngIf="showPatientSelector && canSwitchPatient()"
+          >
+            <div
+              *ngFor="let patient of availablePatients"
+              class="patient-option"
+              [class.selected]="patient.id === selectedPatientId"
+              (click)="switchPatient(patient.id); showPatientSelector = false"
+            >
+              <span class="option-label">{{ patient.label }}</span>
+              <span class="check-mark" *ngIf="patient.id === selectedPatientId"
+                >✓</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading Patients -->
+        <div class="patient-selector loading" *ngIf="isLoadingPatients">
+          <span class="patient-icon">⏳</span>
+          <span>Loading patients...</span>
         </div>
       </div>
 
+      <!-- Connection Status -->
+      <div class="status-bar">
+        <div
+          class="status"
+          [class.connected]="isConnected"
+          [class.disconnected]="!isConnected"
+        >
+          {{ isConnected ? "🟢 Connected" : "🔴 Disconnected" }}
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="header-actions">
+          <button
+            class="btn-icon"
+            (click)="loadHistory()"
+            [disabled]="!isConnected"
+            title="Load conversation history"
+          >
+            📜
+          </button>
+          <button
+            class="btn-icon"
+            (click)="messages = []"
+            [disabled]="messages.length === 0"
+            title="Clear chat"
+          >
+            🗑️
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Messages Container -->
+    <div class="messages" #messagesContainer>
+      <!-- Welcome Message -->
+      <div *ngIf="messages.length === 0" class="welcome-message">
+        <h3>👋 Welcome</h3>
+        <p>
+          I'm your AI medical assistant for
+          <strong>{{ getCurrentPatientName() }}</strong
+          >.
+        </p>
+        <p>How can I help you today?</p>
+        <div class="quick-actions" *ngIf="isConnected">
+          <small>Quick actions:</small>
+          <button
+            class="quick-btn"
+            (click)="messageInput = 'I need help with symptoms'; sendMessage()"
+          >
+            💊 Report Symptoms
+          </button>
+          <button
+            class="quick-btn"
+            (click)="
+              messageInput = 'I want to book an appointment'; sendMessage()
+            "
+          >
+            📅 Book Appointment
+          </button>
+          <button
+            class="quick-btn"
+            (click)="
+              messageInput = 'Tell me about my recent visits'; sendMessage()
+            "
+          >
+            📋 Recent Visits
+          </button>
+        </div>
+      </div>
+
+      <!-- Message Bubbles -->
+      <div
+        *ngFor="let message of messages"
+        [class.message]="true"
+        [ngClass]="message.sender"
+      >
+        <div class="message-bubble">
+          <div class="message-content">{{ message.content }}</div>
+          <div class="message-time">
+            {{ message.timestamp | date : "short" }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Typing Indicator -->
       <div *ngIf="showTyping" class="typing-indicator">
         <div class="typing-dots">
           <span></span>
@@ -29,22 +137,46 @@
       </div>
     </div>
 
+    <!-- Input Area -->
     <div class="input-area">
       <input
         type="text"
         [(ngModel)]="messageInput"
-        (keyup.enter)="sendMessage()"
-        [disabled]="!isConnected || isLoading"
-        placeholder="Type your message..."
+        (keypress)="onKeyPress($event)"
+        [disabled]="!isConnected || isLoading || !selectedPatientId"
+        [placeholder]="
+          selectedPatientId
+            ? 'Type your message...'
+            : 'Select a patient to start chatting'
+        "
         class="message-input"
+        autocomplete="off"
       />
       <button
         (click)="sendMessage()"
-        [disabled]="!isConnected || isLoading || !messageInput.trim()"
+        [disabled]="
+          !isConnected ||
+          isLoading ||
+          !messageInput.trim() ||
+          !selectedPatientId
+        "
         class="send-button"
+        title="Send message"
       >
-        {{ isLoading ? '⏳' : '📤' }}
+        {{ isLoading ? "⏳" : "📤" }}
       </button>
+    </div>
+
+    <!-- Footer Info -->
+    <div class="chat-footer">
+      <small>
+        <span *ngIf="canSwitchPatient()">
+          💡 Tip: Click on the patient name above to switch between profiles
+        </span>
+        <span *ngIf="!canSwitchPatient() && selectedPatientId">
+          Chatting as {{ getCurrentPatientName() }}
+        </span>
+      </small>
     </div>
   </div>
 </div>

@@ -2,6 +2,9 @@
 -- Creates the mapping between IAM users and FHIR patients
 -- Enables multi-patient support for family members
 
+-- Ensure we are operating on the chatbot database created in 000
+\connect chatbot
+
 CREATE TABLE IF NOT EXISTS user_patient_mapping (
   id SERIAL PRIMARY KEY,
   iam_user_id VARCHAR(255) NOT NULL,

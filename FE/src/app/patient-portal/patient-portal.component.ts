@@ -1,16 +1,29 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FhirService } from '../services/fhir.service';
-import { forkJoin } from 'rxjs';
+import { forkJoin, Subject } from 'rxjs';
 import { AuthService } from '../services/auth.service';
+import { UserPatientService } from '../services/user-patient.service';
 import { Roles } from '../services/roles';
+import { takeUntil } from 'rxjs/operators';
+
+interface PatientOption {
+  id: string;
+  label: string;
+  isPrimary: boolean;
+}
 
 @Component({
   selector: 'app-patient-portal',
   templateUrl: './patient-portal.component.html',
   styleUrls: ['./patient-portal.component.css']
 })
-export class PatientPortalComponent implements OnInit {
-  patient: any = 1;
+export class PatientPortalComponent implements OnInit, OnDestroy {
+  patient: any = null;
+  selectedPatientId: string | null = null;
+  availablePatients: PatientOption[] = [];
+  showPatientSelector = false;
+  isLoadingPatients = true;
+  
   appointments: any[] = [];
   upcomingAppointments: any[] = [];
   pastAppointments: any[] = [];
@@ -20,40 +33,187 @@ export class PatientPortalComponent implements OnInit {
   selectedAppointment: any | null = null;
   loading = true;
   error: string | null = null;
+  
   // reschedule state
   rescheduleMode = false;
-  rescheduleValue: string | null = null; // value for input[type=datetime-local]
+  rescheduleValue: string | null = null;
   public Roles = Roles;
+
+  private destroy$ = new Subject<void>();
 
   constructor(
     private fhir: FhirService,
-    public auth: AuthService
+    public auth: AuthService,
+    private userPatientService: UserPatientService
   ) { }
 
   ngOnInit() {
-    this.loadPatientData();
+    // Initialize user-patient service
+    this.userPatientService.initialize();
+
+    // Subscribe to patient list changes
+    this.userPatientService.patients$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(patientIds => {
+        this.updatePatientOptions(patientIds);
+        this.isLoadingPatients = false;
+      });
+
+    // Subscribe to primary patient changes
+    this.userPatientService.primaryPatient$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(primaryPatientId => {
+        if (primaryPatientId && primaryPatientId !== this.selectedPatientId) {
+          this.selectedPatientId = primaryPatientId;
+          this.loadPatientData(primaryPatientId);
+        }
+      });
   }
 
-  loadPatientData() {
-    this.loading = true;
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
-    // 1. Try to identify the patient. 
-    // In a real app, we'd use the logged-in user's ID or email to find the FHIR Patient.
-    // For this demo, we'll fetch all patients and pick the first one to simulate "My Profile".
-    this.fhir.getPatients().subscribe({
-      next: (res: any) => {
-        const patients = res.entry || [];
-        if (patients.length > 0) {
-          // Simulate "Current User" is the first patient found
-          this.patient = patients[0].resource;
-          this.fetchMyRecords(this.patient.id);
+  /**
+   * Update available patient options for selector
+   */
+  private updatePatientOptions(patientIds: string[]) {
+    const primaryId = this.userPatientService.getCurrentPrimaryPatient();
+    
+    this.availablePatients = patientIds.map(id => ({
+      id,
+      label: this.formatPatientLabel(id),
+      isPrimary: id === primaryId
+    }));
+
+    console.log('📋 Available patients for portal:', this.availablePatients);
+  }
+
+  /**
+   * Format patient ID for display
+   */
+  private formatPatientLabel(patientId: string): string {
+    // If we have loaded this patient's resource, use actual name
+    if (this.patient && this.patient.id === patientId && this.patient.name && this.patient.name.length > 0) {
+      const name = this.patient.name[0];
+      return this.formatName(name);
+    }
+    
+    // Otherwise show ID
+    const parts = patientId.split('-');
+    const shortId = parts[parts.length - 1] || patientId;
+    const isPrimary = patientId === this.userPatientService.getCurrentPrimaryPatient();
+    
+    return isPrimary ? `Patient ${shortId} ⭐` : `Patient ${shortId}`;
+  }
+
+  /**
+   * Format FHIR name object
+   */
+  private formatName(name: any): string {
+    if (!name) return 'Unknown';
+    if (name.text) return name.text;
+    const given = name.given?.join(' ') || '';
+    const family = name.family || '';
+    return `${given} ${family}`.trim() || 'Unknown';
+  }
+
+  /**
+   * Get display name for current patient
+   */
+  getCurrentPatientName(): string {
+    if (!this.patient) {
+      return 'No patient selected';
+    }
+    const name = this.patient.name?.[0];
+    if (name) {
+      return this.formatName(name);
+    }
+    return this.formatPatientLabel(this.selectedPatientId || '');
+  }
+
+  /**
+   * Toggle patient selector dropdown
+   */
+  togglePatientSelector() {
+    if (this.canSwitchPatient()) {
+      this.showPatientSelector = !this.showPatientSelector;
+    }
+  }
+
+  /**
+   * Check if patient switching is available
+   */
+  canSwitchPatient(): boolean {
+    return this.availablePatients.length > 1;
+  }
+
+  /**
+   * Switch to a different patient
+   */
+  switchPatient(patientId: string) {
+    if (patientId === this.selectedPatientId) {
+      console.log('👤 Already viewing patient:', patientId);
+      return;
+    }
+
+    console.log('🔄 Switching patient from', this.selectedPatientId, 'to', patientId);
+
+    // Verify access before switching
+    this.userPatientService.hasAccessToPatient(patientId).subscribe(hasAccess => {
+      if (!hasAccess) {
+        this.error = 'You do not have access to this patient';
+        setTimeout(() => this.error = null, 3000);
+        return;
+      }
+
+      // Set as primary patient
+      this.userPatientService.setPrimaryPatient(patientId).subscribe(success => {
+        if (success) {
+          this.selectedPatientId = patientId;
+          this.loadPatientData(patientId);
+          
+          // Close dropdown
+          this.showPatientSelector = false;
         } else {
-          this.error = 'No patient profile found. Please contact the clinic.';
-          this.loading = false;
+          this.error = 'Failed to switch patient. Please try again.';
+          setTimeout(() => this.error = null, 3000);
         }
+      });
+    });
+  }
+
+  /**
+   * Load patient data by ID
+   */
+  loadPatientData(patientId: string) {
+    if (!patientId) {
+      this.error = 'No patient selected';
+      this.loading = false;
+      return;
+    }
+
+    this.loading = true;
+    this.error = null;
+    this.appointments = [];
+    this.results = [];
+    this.selectedAppointment = null;
+
+    console.log('📂 Loading data for patient:', patientId);
+
+    // Load patient resource
+    this.fhir.getPatient(patientId).subscribe({
+      next: (patient: any) => {
+        this.patient = patient;
+        this.fetchMyRecords(patientId);
+        
+        // Update patient options with actual names
+        this.updatePatientOptions(this.userPatientService.getCurrentPatients());
       },
       error: (err) => {
-        this.error = 'Failed to load profile. System may be offline.';
+        console.error('Failed to load patient:', err);
+        this.error = 'Failed to load patient profile.';
         this.loading = false;
       }
     });
@@ -111,6 +271,9 @@ export class PatientPortalComponent implements OnInit {
     this.fhir.getDiagnosticReportsForPatient(patientId).subscribe(res => {
       this.results = (res.entry || []).map((e: any) => e.resource);
       this.loading = false;
+    }, error => {
+      console.error('Failed to load diagnostic reports:', error);
+      this.loading = false;
     });
   }
 
@@ -145,7 +308,7 @@ export class PatientPortalComponent implements OnInit {
     const updated = { ...apt, status: 'cancelled', id };
     this.fhir.updateAppointment(id, updated).subscribe({ next: () => {
       // refresh list and clear selection
-      if (this.patient?.id) { this.fetchMyRecords(this.patient.id); }
+      if (this.selectedPatientId) { this.fetchMyRecords(this.selectedPatientId); }
       this.clearSelection();
     }, error: () => {
       alert('Failed to cancel appointment.');
@@ -174,7 +337,7 @@ export class PatientPortalComponent implements OnInit {
     const iso = newDate.toISOString();
     const updated = { ...this.selectedAppointment, start: iso, id };
     this.fhir.updateAppointment(id, updated).subscribe({ next: () => {
-      if (this.patient?.id) { this.fetchMyRecords(this.patient.id); }
+      if (this.selectedPatientId) { this.fetchMyRecords(this.selectedPatientId); }
       this.rescheduleMode = false;
       this.rescheduleValue = null;
       // reselect updated appointment if present

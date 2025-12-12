@@ -48,7 +48,7 @@ export class UserPatientMappingModel {
       WHERE iam_user_id = $1
       ORDER BY is_primary DESC, created_at ASC;
     `;
-
+ console.log('querying patients for user:', query, iamUserId);
     const result: QueryResult = await db.query(query, [iamUserId]);
     return result.rows.map(row => row.fhir_patient_id);
   }

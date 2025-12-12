@@ -13,27 +13,133 @@
   border-radius: 20px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   width: 100%;
-  max-width: 700px;
+  max-width: 800px;
   height: 100%;
-  max-height: 700px;
+  max-height: 750px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
+/* ========== HEADER ========== */
 .chat-header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   padding: 20px;
-  text-align: center;
   border-bottom: none;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
 }
 
 .chat-header h2 {
   font-size: 22px;
   font-weight: bold;
-  margin-bottom: 10px;
   margin: 0;
+  flex-shrink: 0;
+}
+
+/* ========== PATIENT SELECTOR ========== */
+.patient-selector {
+  position: relative;
+  flex: 1;
+  max-width: 350px;
+  margin-left: 20px;
+}
+
+.current-patient {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.current-patient.clickable {
+  cursor: pointer;
+}
+
+.current-patient.clickable:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.patient-icon {
+  font-size: 18px;
+}
+
+.patient-name {
+  flex: 1;
+  font-weight: 500;
+}
+
+.dropdown-arrow {
+  font-size: 10px;
+  transition: transform 0.2s;
+}
+
+.patient-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 5px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  z-index: 1000;
+  animation: dropdown 0.2s ease-out;
+}
+
+@keyframes dropdown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.patient-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  color: #333;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.patient-option:hover {
+  background: #f0f0f0;
+}
+
+.patient-option.selected {
+  background: #e8edff;
+  color: #667eea;
+  font-weight: 600;
+}
+
+.check-mark {
+  color: #667eea;
+  font-weight: bold;
+}
+
+/* ========== STATUS BAR ========== */
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
 }
 
 .status {
@@ -54,6 +160,34 @@
   background: rgba(248, 113, 113, 0.4);
 }
 
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-icon {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.btn-icon:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.btn-icon:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ========== MESSAGES ========== */
 .messages {
   flex: 1;
   overflow-y: auto;
@@ -66,12 +200,48 @@
 .welcome-message {
   margin: auto;
   text-align: center;
-  color: #999;
+  color: #666;
+  max-width: 500px;
 }
 
 .welcome-message h3 {
   color: #667eea;
   margin-bottom: 10px;
+  font-size: 24px;
+}
+
+.welcome-message p {
+  margin-bottom: 8px;
+}
+
+.quick-actions {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quick-actions small {
+  color: #999;
+  margin-bottom: 5px;
+}
+
+.quick-btn {
+  padding: 10px 15px;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 13px;
+  color: #667eea;
+  font-weight: 500;
+}
+
+.quick-btn:hover {
+  background: #f0f0ff;
+  border-color: #667eea;
+  transform: translateX(5px);
 }
 
 .message {
@@ -82,6 +252,10 @@
 
 .message.user {
   justify-content: flex-end;
+}
+
+.message.system {
+  justify-content: center;
 }
 
 .message-bubble {
@@ -105,8 +279,19 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
+.message.system .message-bubble {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+  border-radius: 12px;
+  max-width: 80%;
+  text-align: center;
+  font-size: 13px;
+}
+
 .message-content {
   margin-bottom: 4px;
+  white-space: pre-wrap;
 }
 
 .message-time {
@@ -114,6 +299,7 @@
   opacity: 0.6;
 }
 
+/* ========== TYPING INDICATOR ========== */
 .typing-indicator {
   margin-bottom: 15px;
   padding: 10px 16px;
@@ -167,6 +353,7 @@
   }
 }
 
+/* ========== INPUT AREA ========== */
 .input-area {
   padding: 20px;
   background: white;
@@ -218,4 +405,63 @@
 .send-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* ========== FOOTER ========== */
+.chat-footer {
+  padding: 10px 20px;
+  background: #f8f9fa;
+  border-top: 1px solid #e0e0e0;
+  text-align: center;
+}
+
+.chat-footer small {
+  color: #999;
+  font-size: 12px;
+}
+
+/* ========== SCROLLBAR ========== */
+.messages::-webkit-scrollbar {
+  width: 8px;
+}
+
+.messages::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.messages::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10px;
+}
+
+.messages::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+  .chat-container {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 0;
+  }
+
+  .header-content {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .patient-selector {
+    margin-left: 0;
+    max-width: 100%;
+  }
+
+  .welcome-message {
+    padding: 10px;
+  }
+
+  .quick-actions {
+    margin-top: 15px;
+  }
 }
