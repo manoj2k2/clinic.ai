@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked, OnDestroy } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { io, Socket } from 'socket.io-client';
 
@@ -14,7 +14,7 @@ interface Message {
   templateUrl: './chatbot.component.html',
   styleUrls: ['./chatbot.component.css']
 })
-export class ChatbotComponent implements OnInit, AfterViewChecked {
+export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
   @ViewChild('messagesContainer') messagesContainer?: ElementRef;
 
   messages: Message[] = [];
@@ -23,7 +23,8 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
   isConnected = false;
   socket?: Socket;
   sessionId = '';
-  patientId = '';
+  selectedPatientId: string | null = null;
+  availablePatients: string[] = [];
   showTyping = false;
 
   constructor(private auth: AuthService) {
@@ -31,21 +32,30 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
   }
 
   ngOnInit() {
-    this.initializeConnection();
+    // Get available patients for this user
+    this.auth.getAvailablePatientIds().subscribe(patients => {
+      this.availablePatients = patients;
+    });
+
+    // Get primary patient and connect
+    this.auth.getPrimaryPatientObservable().subscribe(patientId => {
+      if (patientId) {
+        this.selectedPatientId = patientId;
+        this.initializeConnection();
+      }
+    });
   }
 
   ngAfterViewChecked() {
     this.scrollToBottom();
   }
-
+ 
   initializeConnection() {
-    const patientId = this.auth.getPatientId();
+    const patientId = this.selectedPatientId;
     if (!patientId) {
-      console.error('User not authenticated');
+      console.error('No patient selected');
       return;
     }
-
-    this.patientId = patientId;
 
     this.socket = io('http://localhost:3001', {
       query: {
@@ -83,6 +93,25 @@ export class ChatbotComponent implements OnInit, AfterViewChecked {
     this.socket.on('disconnect', () => {
       console.log('Disconnected from chatbot service');
       this.isConnected = false;
+    });
+  }
+
+  switchPatient(patientId: string) {
+    if (patientId === this.selectedPatientId) return;
+    
+    this.auth.setActivePatientId(patientId).subscribe(success => {
+      if (success) {
+        this.selectedPatientId = patientId;
+        this.messages = [];
+        
+        // Disconnect and reconnect with new patient
+        if (this.socket) {
+          this.socket.disconnect();
+        }
+        
+        this.sessionId = 'session-' + Date.now();
+        this.initializeConnection();
+      }
     });
   }
 

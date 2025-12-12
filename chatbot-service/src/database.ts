@@ -24,6 +24,13 @@ export const fhirPool = new Pool({
   connectionTimeoutMillis: 2000,
 });
 
+/**
+ * Get the chatbot database connection pool
+ */
+export function getDb() {
+  return chatbotPool;
+}
+
 // Test connection
 export async function testConnection() {
   try {

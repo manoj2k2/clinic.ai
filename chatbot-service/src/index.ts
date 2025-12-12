@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { testConnection } from './database';
 import { ConversationModel } from './models/conversation.model';
+import { UserPatientMappingModel } from './models/user-patient-mapping.model';
 import { SessionService } from './services/session.service';
 import { chatWithAI, testAI, getProviderInfo } from './ai-provider';
 import { fhirClient } from './services/fhir-client.service';
@@ -150,6 +151,201 @@ app.get('/api/patients/:patientId/conversations', async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Failed to fetch patient history'
+    });
+  }
+});
+
+// =====================================================
+// USER-PATIENT MAPPING ENDPOINTS
+// =====================================================
+
+/**
+ * Get all patients accessible to the authenticated user
+ * Query params: userId (IAM user ID from token)
+ */
+app.get('/api/users/:userId/patients', async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        error: 'userId is required'
+      });
+    }
+
+    const patientIds = await UserPatientMappingModel.getPatientsByUser(userId);
+
+    res.json({
+      success: true,
+      userId,
+      patientIds,
+      count: patientIds.length
+    });
+  } catch (error) {
+    console.error('Error fetching user patients:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch user patients'
+    });
+  }
+});
+
+/**
+ * Get the primary patient for a user
+ */
+app.get('/api/users/:userId/patients/primary', async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        error: 'userId is required'
+      });
+    }
+
+    const primaryPatientId = await UserPatientMappingModel.getPrimaryPatient(userId);
+
+    if (!primaryPatientId) {
+      return res.status(404).json({
+        success: false,
+        error: 'No primary patient found for user'
+      });
+    }
+
+    res.json({
+      success: true,
+      userId,
+      primaryPatientId
+    });
+  } catch (error) {
+    console.error('Error fetching primary patient:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch primary patient'
+    });
+  }
+});
+
+/**
+ * Add a patient to a user's accessible patients
+ */
+app.post('/api/users/:userId/patients', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { patientId, isPrimary } = req.body;
+
+    if (!userId || !patientId) {
+      return res.status(400).json({
+        success: false,
+        error: 'userId and patientId are required'
+      });
+    }
+
+    const mapping = await UserPatientMappingModel.addPatientToUser(userId, patientId, isPrimary !== false);
+
+    res.json({
+      success: true,
+      message: `Patient ${patientId} added to user ${userId}`,
+      mapping
+    });
+  } catch (error) {
+    console.error('Error adding patient to user:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to add patient to user'
+    });
+  }
+});
+
+/**
+ * Set a patient as primary for a user
+ */
+app.put('/api/users/:userId/patients/:patientId/primary', async (req, res) => {
+  try {
+    const { userId, patientId } = req.params;
+
+    if (!userId || !patientId) {
+      return res.status(400).json({
+        success: false,
+        error: 'userId and patientId are required'
+      });
+    }
+
+    // Check access first
+    const hasAccess = await UserPatientMappingModel.hasAccessToPatient(userId, patientId);
+    if (!hasAccess) {
+      return res.status(403).json({
+        success: false,
+        error: 'Patient not found or user does not have access'
+      });
+    }
+
+    await UserPatientMappingModel.setPrimaryPatient(userId, patientId);
+
+    res.json({
+      success: true,
+      message: `Patient ${patientId} set as primary for user ${userId}`
+    });
+  } catch (error) {
+    console.error('Error setting primary patient:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to set primary patient'
+    });
+  }
+});
+
+/**
+ * Check if user has access to a patient
+ */
+app.get('/api/users/:userId/patients/:patientId/access', async (req, res) => {
+  try {
+    const { userId, patientId } = req.params;
+
+    const hasAccess = await UserPatientMappingModel.hasAccessToPatient(userId, patientId);
+
+    res.json({
+      success: true,
+      userId,
+      patientId,
+      hasAccess
+    });
+  } catch (error) {
+    console.error('Error checking patient access:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to check patient access'
+    });
+  }
+});
+
+/**
+ * Remove a patient from user's accessible patients
+ */
+app.delete('/api/users/:userId/patients/:patientId', async (req, res) => {
+  try {
+    const { userId, patientId } = req.params;
+
+    if (!userId || !patientId) {
+      return res.status(400).json({
+        success: false,
+        error: 'userId and patientId are required'
+      });
+    }
+
+    await UserPatientMappingModel.removePatientFromUser(userId, patientId);
+
+    res.json({
+      success: true,
+      message: `Patient ${patientId} removed from user ${userId}`
+    });
+  } catch (error) {
+    console.error('Error removing patient:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to remove patient'
     });
   }
 });

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FhirService } from '../services/fhir.service';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-patient-editor',
@@ -80,7 +81,7 @@ export class PatientEditorComponent implements OnInit {
   birthDate = '';
   gender = '';
 
-  constructor(private route: ActivatedRoute, private router: Router, private fhir: FhirService) { }
+  constructor(private route: ActivatedRoute, private router: Router, private fhir: FhirService, private auth: AuthService) { }
 
   ngOnInit(): void {
     this.id = this.route.snapshot.paramMap.get('id');
@@ -115,10 +116,34 @@ export class PatientEditorComponent implements OnInit {
     };
 
     if (this.isNew) {
-      this.fhir.createPatient(patient).subscribe({ next: () => this.router.navigate(['/patients']), error: (e) => this.error = e.message || 'Create failed' });
+      this.fhir.createPatient(patient).subscribe({ 
+        next: (response: any) => {
+          const newPatientId = response.id;
+          
+          // Add mapping in database for this patient
+          if (newPatientId && this.auth.isLoggedIn()) {
+            this.auth.addPatientMapping(newPatientId, true).subscribe({
+              next: () => {
+                console.log('✅ Patient created and mapping added');
+                this.router.navigate(['/patients']);
+              },
+              error: (err) => {
+                console.warn('⚠️  Patient created but mapping failed:', err);
+                this.router.navigate(['/patients']);
+              }
+            });
+          } else {
+            this.router.navigate(['/patients']);
+          }
+        },
+        error: (e) => this.error = e.message || 'Create failed' 
+      });
     } else if (this.id) {
-      patient.id = this.id; // Add id for update operation
-      this.fhir.updatePatient(this.id, patient).subscribe({ next: () => this.router.navigate(['/patients']), error: (e) => this.error = e.message || 'Update failed' });
+      patient.id = this.id;
+      this.fhir.updatePatient(this.id, patient).subscribe({ 
+        next: () => this.router.navigate(['/patients']), 
+        error: (e) => this.error = e.message || 'Update failed' 
+      });
     }
   }
 
