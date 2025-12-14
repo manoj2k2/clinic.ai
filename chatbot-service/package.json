@@ -24,6 +24,7 @@
     "@langchain/core": "^1.1.5",
     "@langchain/google-genai": "^2.1.0",
     "@langchain/openai": "^1.2.0",
+    "@modelcontextprotocol/sdk": "^1.24.3",
     "axios": "^1.13.2",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",

@@ -83,7 +83,55 @@ chatbot-service/
 └── README.md
 ```
 
-## 🔌 API Endpoints
+## � MCP Integration (Model Context Protocol)
+
+This service includes **MCP (Model Context Protocol)** integration for enhanced security, standardization, and interoperability in healthcare AI systems.
+
+### What is MCP?
+
+MCP provides a standardized protocol for secure AI model access to external tools and data sources, offering:
+
+- **🔒 Security**: Built-in authorization and audit trails
+- **📋 Standardization**: Common interface for healthcare tools
+- **🔄 Interoperability**: Works across different healthcare systems
+- **📊 Compliance**: HIPAA-compliant data access controls
+
+### MCP Benefits for Healthcare
+
+1. **Enhanced Security**: Every tool call is authorized and logged
+2. **Standardized Tools**: Consistent interface for healthcare operations
+3. **Multi-System Integration**: Connect to multiple healthcare data sources
+4. **Compliance Ready**: Built-in HIPAA compliance features
+5. **Scalable Architecture**: Easy to add new healthcare capabilities
+
+### MCP Components
+
+- **`healthcare-mcp-server.ts`** - MCP server providing secure healthcare tools
+- **`mcp-healthcare-integration.ts`** - Integration layer for LangChain agents
+- **`MCP_HEALTHCARE_INTEGRATION.md`** - Detailed integration guide
+
+### Running with MCP
+
+```bash
+# Start MCP server and chatbot service together
+./start-mcp-services.bat
+
+# Or run MCP integration test
+node test-mcp-integration.js
+```
+
+### MCP Healthcare Tools
+
+The MCP server provides these secure healthcare tools:
+
+- **Patient Lookup**: Secure patient data access with authorization
+- **Appointment Management**: Schedule and manage appointments
+- **Symptom Assessment**: AI-powered symptom screening
+- **Emergency Detection**: Identify urgent medical situations
+- **Practitioner Search**: Find healthcare providers
+- **Audit Logging**: Comprehensive compliance tracking
+
+## �🔌 API Endpoints
 
 ### REST API
 
