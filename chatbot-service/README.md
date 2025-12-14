@@ -1,6 +1,6 @@
 # AI Chatbot Service
 
-AI-powered chatbot and patient screening service for Clinic.AI, built with Node.js, TypeScript, PostgreSQL, and your choice of **OpenAI** or **Google Gemini**.
+AI-powered chatbot and patient screening service for Clinic.AI, built with Node.js, TypeScript, PostgreSQL, and your choice of **OpenAI** or **Google Gemini**. Includes FHIR integration for healthcare data access and user-patient mapping for secure patient interactions.
 
 ## 🚀 Quick Start
 
@@ -43,6 +43,12 @@ cp .env.example .env
 - For OpenAI: `OPENAI_API_KEY` - Get from https://platform.openai.com/api-keys
 - `AI_PROVIDER` - Set to `gemini` or `openai` (default: `gemini`)
 
+**FHIR Integration:**
+
+- `FHIR_BASE_URL` - FHIR server URL (default: `http://localhost:8080/fhir`)
+- `FHIR_USERNAME` - FHIR server username
+- `FHIR_PASSWORD` - FHIR server password
+
 ### 4. Run Development Server
 
 ```bash
@@ -62,14 +68,18 @@ chatbot-service/
 ├── src/
 │   ├── index.ts                    # Main server file
 │   ├── database.ts                 # PostgreSQL connection
-│   ├── ai-provider.ts             # Google Gemini integration
+│   ├── ai-provider.ts             # AI provider abstraction (OpenAI/Gemini)
 │   ├── models/
 │   │   └── conversation.model.ts  # Conversation data model
 │   └── services/
-│       └── session.service.ts     # Session management
+│       ├── session.service.ts     # Session management
+│       ├── fhir-client.service.ts # FHIR integration client
+│       ├── test-fhir-client.ts    # FHIR client testing utilities
+│       └── fhir-examples.ts       # FHIR integration examples
 ├── package.json
 ├── tsconfig.json
 ├── .env.example
+├── test-chat.html                 # WebSocket test client
 └── README.md
 ```
 
@@ -80,6 +90,10 @@ chatbot-service/
 - `GET /health` - Health check
 - `GET /api/conversations/:sessionId` - Get conversation history
 - `GET /api/patients/:patientId/conversations` - Get patient's conversations
+- `GET /api/fhir/patients` - Get FHIR patients (requires user-patient mapping)
+- `GET /api/fhir/patients/:id` - Get specific FHIR patient
+- `GET /api/fhir/observations?patient=:id` - Get patient observations
+- `GET /api/fhir/appointments?patient=:id` - Get patient appointments
 
 ### WebSocket Events
 
@@ -95,32 +109,28 @@ chatbot-service/
 - `typing` - AI typing indicator
 - `error` - Error message
 
-## 🧪 Testing
+## 🤖 AI Provider Implementation
 
-### Health Check
+This service supports **both OpenAI and Google Gemini** as AI providers with automatic switching capability.
 
-```bash
-curl http://localhost:3001/health
+### Provider Architecture
+
+The service uses an abstraction layer (`ai-provider.ts`) that allows seamless switching between AI providers:
+
+```typescript
+interface AIProvider {
+  generateResponse(prompt: string, context?: any): Promise<string>;
+  getModelName(): string;
+}
+
+class GeminiProvider implements AIProvider {
+  // Gemini implementation
+}
+
+class OpenAIProvider implements AIProvider {
+  // OpenAI implementation
+}
 ```
-
-### WebSocket Test
-
-Create `test-chat.html` (see QUICK_START_GUIDE.md for full code) or use a WebSocket client.
-
-## 🐘 Database Schema
-
-Tables:
-
-- `conversations` - Chat conversations
-- `messages` - Individual messages
-- `screening_sessions` - Symptom screening data
-- `sessions` - User session state
-
-See `../chatbot-db-setup.sql` for complete schema.
-
-## 🤖 AI Provider
-
-This service supports **both OpenAI and Google Gemini** as AI providers. You can choose which one to use via environment variables.
 
 ### Using Google Gemini (Default)
 
@@ -158,6 +168,163 @@ Simply change the `AI_PROVIDER` variable in your `.env` file and restart the ser
 
 **Note:** Make sure you have the corresponding API key configured for your chosen provider.
 
+### Provider Features
+
+- **Automatic Fallback**: If primary provider fails, service can fallback to secondary
+- **Cost Optimization**: Gemini for cost-effective responses, OpenAI for advanced reasoning
+- **Model Flexibility**: Support for multiple models within each provider
+- **Rate Limiting**: Built-in rate limiting to prevent API quota exhaustion
+
+## 🏥 FHIR Integration
+
+The service integrates with FHIR (Fast Healthcare Interoperability Resources) servers to access patient data, observations, appointments, and other healthcare information.
+
+### FHIR Client Architecture
+
+The FHIR client (`fhir-client.service.ts`) provides:
+
+- RESTful API access to FHIR resources
+- Authentication handling
+- Error handling and retries
+- Type-safe FHIR resource models
+
+### Configuration
+
+Configure FHIR server connection in `.env`:
+
+```env
+FHIR_BASE_URL=http://localhost:8080/fhir
+FHIR_USERNAME=your_fhir_username
+FHIR_PASSWORD=your_fhir_password
+```
+
+### Available FHIR Resources
+
+- **Patient**: Patient demographics and identifiers
+- **Observation**: Vital signs, lab results, clinical measurements
+- **Appointment**: Scheduled appointments and encounters
+- **Practitioner**: Healthcare provider information
+- **Organization**: Healthcare facility information
+
+### FHIR API Usage Examples
+
+#### Get Patient Information
+
+```typescript
+const patient = await fhirClient.getPatient('12345');
+console.log(`Patient: ${patient.name[0].given[0]} ${patient.name[0].family}`);
+```
+
+#### Get Patient Observations
+
+```typescript
+const observations = await fhirClient.getPatientObservations('12345');
+observations.forEach(obs => {
+  console.log(`${obs.code.text}: ${obs.valueQuantity.value} ${obs.valueQuantity.unit}`);
+});
+```
+
+#### Get Patient Appointments
+
+```typescript
+const appointments = await fhirClient.getPatientAppointments('12345');
+appointments.forEach(apt => {
+  console.log(`Appointment: ${apt.start} - ${apt.description}`);
+});
+```
+
+### FHIR Integration Features
+
+- **Secure Access**: Authenticated access to protected health information
+- **Standard Compliance**: Full FHIR R4 compliance
+- **Error Handling**: Comprehensive error handling for network issues and invalid responses
+- **Caching**: Optional caching layer for frequently accessed data
+- **Audit Logging**: Request/response logging for compliance
+
+## 👥 User-Patient Mapping
+
+The service implements a secure user-patient mapping system to ensure users can only access their authorized patient data.
+
+### Database Schema
+
+```sql
+CREATE TABLE user_patient_mapping (
+  id SERIAL PRIMARY KEY,
+  user_id VARCHAR(255) NOT NULL,
+  patient_id VARCHAR(255) NOT NULL,
+  relationship_type VARCHAR(50), -- 'self', 'guardian', 'proxy', etc.
+  authorized_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  authorized_by VARCHAR(255),
+  is_active BOOLEAN DEFAULT true,
+  permissions JSONB, -- granular permissions
+  UNIQUE(user_id, patient_id)
+);
+```
+
+### Mapping Features
+
+- **Relationship Types**: Self, guardian, family member, healthcare proxy
+- **Granular Permissions**: Read/write access to specific data types
+- **Audit Trail**: Complete authorization history
+- **Access Control**: Runtime permission checking
+
+### API Integration
+
+All FHIR data access is filtered through user-patient mapping:
+
+```typescript
+// Check if user can access patient data
+const canAccess = await checkUserPatientAccess(userId, patientId);
+
+// Get authorized patients for user
+const authorizedPatients = await getAuthorizedPatients(userId);
+```
+
+### Security Considerations
+
+- **Authorization Checks**: Every FHIR request validates user permissions
+- **Data Isolation**: Users can only see their mapped patients
+- **Audit Logging**: All access attempts are logged
+- **Consent Management**: Integration with consent management systems
+
+## 🧪 Testing
+
+### Health Check
+
+```bash
+curl http://localhost:3001/health
+```
+
+### WebSocket Test
+
+Create `test-chat.html` (see QUICK_START_GUIDE.md for full code) or use a WebSocket client.
+
+### FHIR Client Testing
+
+Test FHIR integration with the test utilities:
+
+```typescript
+import { testFHIRConnection, testPatientRetrieval } from './src/services/test-fhir-client';
+
+// Test basic connectivity
+await testFHIRConnection();
+
+// Test patient data retrieval
+await testPatientRetrieval('test-patient-id');
+```
+
+## 🐘 Database Schema
+
+Tables:
+
+- `conversations` - Chat conversations
+- `messages` - Individual messages
+- `screening_sessions` - Symptom screening data
+- `sessions` - User session state
+- `user_patient_mapping` - User to patient relationships
+
+See `../chatbot-db-setup.sql` for complete schema.
+
 ## 📊 Monitoring
 
 View active sessions:
@@ -177,10 +344,15 @@ SELECT * FROM high_risk_screenings;
 
 -- Daily stats
 SELECT * FROM daily_conversation_stats;
+
+-- User-patient mappings
+SELECT user_id, patient_id, relationship_type FROM user_patient_mapping WHERE is_active = true;
 ```
 
 ## 🔒 Security
 
+- [x] User-patient mapping for data access control
+- [x] FHIR authentication and authorization
 - [ ] Add authentication middleware (Keycloak JWT)
 - [ ] Implement rate limiting
 - [ ] Add input validation
@@ -220,10 +392,35 @@ Create `Dockerfile` to containerize the service.
 - Check API quota: https://aistudio.google.com/app/apikey
 - Look at server logs for error messages
 
+**FHIR connection fails:**
+
+- Verify FHIR server is running: `curl http://localhost:8080/fhir/metadata`
+- Check FHIR credentials in `.env`
+- Test with: `curl -u username:password http://localhost:8080/fhir/Patient`
+
 **Port already in use:**
 
 - Change PORT in `.env` to different value
 - Or stop other service using port 3001
+
+## 📝 Recent Updates
+
+### Service Refactoring (Completed)
+
+- **Modular Architecture**: Separated concerns into distinct service modules
+- **Type Safety**: Enhanced TypeScript usage throughout the codebase
+- **Error Handling**: Improved error handling and logging
+- **Configuration Management**: Centralized configuration with environment variables
+- **Testing Infrastructure**: Added comprehensive testing utilities
+
+### FHIR Integration (Task 1.13 - Completed)
+
+- ✅ FHIR client service implementation
+- ✅ Patient data retrieval and mapping
+- ✅ Observation and appointment integration
+- ✅ Authentication and error handling
+- ✅ User-patient mapping security layer
+- ✅ Comprehensive testing and validation
 
 ## 📝 License
 
@@ -231,4 +428,5 @@ MIT
 
 ---
 
-**Built with ❤️ for Clinic.AI**
+**Built with ❤️ for Clinic.AI**</content>
+<parameter name="filePath">c:\Users\aryan\source\repos\clinicai\chatbot-service\README.md
