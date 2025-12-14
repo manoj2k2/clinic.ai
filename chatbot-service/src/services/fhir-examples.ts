@@ -4,7 +4,7 @@
  * Copy and paste these examples into your chatbot code
  */
 
-import { fhirClient } from './services/fhir-client.service';
+import { fhirClient } from './fhir-client.service';
 
 // ============================================================
 // Example 1: Get Patient Demographics
@@ -33,7 +33,7 @@ async function example2_getObservations() {
     const observations = await fhirClient.getPatientObservations('1', undefined, undefined, 10);
     
     console.log(`Found ${observations.length} observations:`);
-    observations.forEach((obs, index) => {
+    observations.forEach((obs: any, index: number) => {
       const code = obs.code.text || obs.code.coding?.[0]?.display;
       const value = obs.valueQuantity 
         ? `${obs.valueQuantity.value} ${obs.valueQuantity.unit}`
@@ -156,14 +156,14 @@ async function example6_patientSummary(patientId: string) {
     // Get appointments
     const appointments = await fhirClient.getPatientAppointments(patientId);
     console.log(`\n📅 Appointments: ${appointments.length}`);
-    appointments.slice(0, 3).forEach(apt => {
+    appointments.slice(0, 3).forEach((apt: any) => {
       console.log(`   - ${apt.status}: ${apt.start || 'Not scheduled'}`);
     });
     
     // Get vital signs
     const vitals = await fhirClient.getPatientObservations(patientId, 'vital-signs', undefined, 5);
     console.log(`\n💓 Recent Vital Signs: ${vitals.length}`);
-    vitals.forEach(v => {
+    vitals.forEach((v: any) => {
       const value = v.valueQuantity ? `${v.valueQuantity.value} ${v.valueQuantity.unit}` : 'N/A';
       console.log(`   - ${v.code.text || v.code.coding?.[0]?.display}: ${value}`);
     });
@@ -171,7 +171,7 @@ async function example6_patientSummary(patientId: string) {
     // Get recent symptoms
     const symptoms = await fhirClient.getPatientObservations(patientId, 'survey', undefined, 5);
     console.log(`\n🤒 Recent Symptoms: ${symptoms.length}`);
-    symptoms.forEach(s => {
+    symptoms.forEach((s: any) => {
       console.log(`   - ${s.code.text} (${s.effectiveDateTime})`);
     });
     

@@ -1,17 +1,20 @@
 import { ConversationModel, Message } from '../models/conversation.model';
 import { SessionService } from './session.service';
 import { chatWithAI } from '../ai-provider';
+import { LangChainHealthcareAgentService } from './langchain-healthcare-agent.service';
 import { NotFoundError, ValidationError } from '../middleware/error.middleware';
 
 export interface ChatMessage {
   content: string;
   metadata?: any;
+  userId?: string; // Add userId for healthcare agent context
 }
 
 export interface ChatResponse {
   message: string;
   timestamp: string;
   conversationId?: number;
+  healthcareActions?: any[]; // Add healthcare actions to response
 }
 
 export class ChatService {
@@ -48,19 +51,57 @@ export class ChatService {
       content: m.content
     }));
 
-    // Get AI response
-    const aiResult = await chatWithAI(userMessage.content, aiHistory);
+    // Determine if this is a healthcare-related message
+    const isHealthcareMessage = this.isHealthcareRelated(userMessage.content);
+
+    let aiResult;
+    let healthcareActions: any[] = [];
+
+    if (isHealthcareMessage) {
+      // Use LangChain healthcare agent for specialized medical assistance
+      console.log('🏥 Routing to LangChain healthcare agent');
+      const healthcareAgent = new LangChainHealthcareAgentService();
+
+      const agentResponse = await healthcareAgent.processHealthcareMessage(
+        userMessage.content,
+        {
+          userId: userMessage.userId,
+          sessionId,
+          patientId,
+          conversationHistory: [] // LangChain agent handles its own memory
+        }
+      );
+
+      aiResult = {
+        success: agentResponse.success,
+        response: agentResponse.response,
+        error: agentResponse.success ? null : 'LangChain healthcare agent error'
+      };
+
+      healthcareActions = agentResponse.actions || [];
+    } else {
+      // Use general AI for non-healthcare messages
+      console.log('💬 Using general AI response');
+      aiResult = await chatWithAI(userMessage.content, aiHistory);
+    }
 
     if (!aiResult.success) {
       throw new Error(aiResult.error || 'AI service unavailable');
     }
 
-    // Save AI response
+    // Save AI response with healthcare metadata
+    const responseMetadata = {
+      ai_provider: process.env.AI_PROVIDER,
+      is_healthcare: isHealthcareMessage,
+      healthcare_actions: healthcareActions.length,
+      agent_type: isHealthcareMessage ? 'langchain' : 'general'
+    };
+
     await ConversationModel.addMessage(
       conversation.id!,
       'assistant',
       aiResult.response || 'Sorry, I could not generate a response.',
-      { ai_provider: process.env.AI_PROVIDER }
+      responseMetadata
     );
 
     // Update session
@@ -74,7 +115,8 @@ export class ChatService {
     return {
       message: aiResult.response!,
       timestamp: new Date().toISOString(),
-      conversationId: conversation.id
+      conversationId: conversation.id,
+      healthcareActions: isHealthcareMessage ? healthcareActions : undefined
     };
   }
 
@@ -130,10 +172,41 @@ export class ChatService {
    */
   static async getStats() {
     const activeSessions = await SessionService.getActiveCount();
-    
+
     return {
       activeSessions,
       timestamp: new Date().toISOString()
     };
+  }
+
+  /**
+   * Determine if a message is healthcare-related
+   */
+  private static isHealthcareRelated(message: string): boolean {
+    const healthcareKeywords = [
+      // Symptoms and conditions
+      'pain', 'ache', 'hurt', 'fever', 'cough', 'headache', 'nausea', 'dizzy',
+      'chest pain', 'shortness of breath', 'vomiting', 'diarrhea', 'rash',
+      'sore throat', 'runny nose', 'fatigue', 'weakness', 'swelling',
+
+      // Medical actions
+      'appointment', 'schedule', 'book', 'see doctor', 'check-up', 'exam',
+      'prescription', 'medication', 'medicine', 'treatment', 'therapy',
+
+      // Healthcare facilities and staff
+      'clinic', 'hospital', 'doctor', 'nurse', 'physician', 'specialist',
+      'emergency', 'urgent care', 'pharmacy', 'lab work', 'test results',
+
+      // Health inquiries
+      'insurance', 'billing', 'medical records', 'health records',
+      'symptoms', 'diagnosis', 'condition', 'illness', 'disease',
+
+      // Common health concerns
+      'blood pressure', 'cholesterol', 'diabetes', 'asthma', 'allergy',
+      'mental health', 'depression', 'anxiety', 'stress', 'sleep'
+    ];
+
+    const lowerMessage = message.toLowerCase();
+    return healthcareKeywords.some(keyword => lowerMessage.includes(keyword));
   }
 }

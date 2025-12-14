@@ -21,6 +21,7 @@ import { setupWebSocketHandlers } from './websocket/socket.handler';
 import healthRoutes from './routes/health.routes';
 import conversationRoutes from './routes/conversation.routes';
 import userPatientRoutes from './routes/user-patient.routes';
+import healthcareRoutes from './routes/healthcare.routes';
 
 // Load environment variables
 dotenv.config();
@@ -67,6 +68,7 @@ app.get('/api-docs.json', (req, res) => {
 app.use('/', healthRoutes);
 app.use('/api/conversations', conversationRoutes);
 app.use('/api/users', userPatientRoutes);
+app.use('/api/healthcare', healthcareRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -82,7 +84,8 @@ app.get('/', (req, res) => {
       health: '/health',
       websocket: 'ws://localhost:' + (process.env.PORT || 3001),
       conversations: '/api/conversations',
-      userPatientMapping: '/api/users/:userId/patients'
+      userPatientMapping: '/api/users/:userId/patients',
+      healthcare: '/api/healthcare'
     },
     timestamp: new Date().toISOString()
   });
