@@ -38,7 +38,7 @@ if %errorlevel% neq 0 (
 
 REM Start MCP Healthcare Server in background
 echo 🏥 Starting MCP Healthcare Server...
-start "MCP Healthcare Server" cmd /k "node dist/services/healthcare-mcp-server.js"
+start "MCP Healthcare Server" cmd /k "node dist/services/patient-mcp-server.js"
 
 REM Wait a moment for server to start
 timeout /t 3 /nobreak >nul

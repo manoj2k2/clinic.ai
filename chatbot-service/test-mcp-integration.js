@@ -20,7 +20,7 @@ async function testMCPIntegration() {
             {
                 name: 'fhir-server',
                 command: 'node',
-                args: ['dist/services/healthcare-mcp-server.js']
+                args: ['dist/services/patient-mcp-server.js']
             }
         ]);
 

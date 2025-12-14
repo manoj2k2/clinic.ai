@@ -77,14 +77,18 @@ LangChain Agent → MCP Client → MCP Server → FHIR API
 
 ## Key MCP Components
 
-### 1. MCP Server (`healthcare-mcp-server.ts`)
+### 1. MCP Server (`patient-mcp-server.ts`)
 - **Purpose**: Provides secure healthcare tool access
 - **Features**:
   - Patient data lookup with authorization
   - Appointment management
-  - Symptom assessment
+  - Symptom assessment and recording
   - Emergency detection
-  - Audit logging
+  - Patient observations (vital signs, lab results)
+  - Vital signs recording
+  - FHIR server health checks
+  - Server capabilities discovery
+  - Audit logging for all operations
 
 ### 2. MCP Client Integration (`mcp-healthcare-integration.ts`)
 - **Purpose**: Connects LangChain agent to MCP servers
@@ -100,6 +104,36 @@ LangChain Agent → MCP Client → MCP Server → FHIR API
   - Seamless integration
   - Consistent interface
   - Error propagation
+
+## Available MCP Healthcare Tools
+
+The MCP server provides the following secure healthcare tools:
+
+### Core Patient Operations
+- **`fhir_patient_lookup`**: Securely retrieve patient demographics with HIPAA authorization
+- **`fhir_appointments_lookup`**: Get patient appointments with date filtering and access controls
+- **`fhir_patient_observations`**: Retrieve patient observations (vital signs, lab results) with category/code filtering
+
+### Clinical Data Recording
+- **`record_patient_symptoms`**: Record patient-reported symptoms as structured FHIR observations
+- **`record_vital_signs`**: Record vital signs (temperature, blood pressure, heart rate, etc.) with proper coding
+- **`create_patient_observation`**: Create custom FHIR observations with full validation
+
+### Clinical Intelligence
+- **`symptom_assessment`**: AI-powered symptom analysis and triage recommendations
+- **`emergency_detection`**: Analyze text for medical emergencies and provide immediate guidance
+- **`appointment_booking`**: Schedule appointments with practitioner matching and availability checking
+- **`practitioner_search`**: Find available healthcare practitioners by specialty and location
+
+### System Operations
+- **`fhir_health_check`**: Check FHIR server connectivity and health status
+- **`fhir_capabilities`**: Retrieve server capabilities and supported FHIR resources
+
+All tools include:
+- **🔐 Authorization checks** for user-patient access
+- **📊 Audit logging** for compliance tracking
+- **⚡ Error handling** with meaningful error messages
+- **🏥 HIPAA compliance** for healthcare data protection
 
 ## Security Advantages
 
@@ -161,7 +195,7 @@ await agent.connectMCPServers([
   {
     name: 'fhir-server',
     command: 'node',
-    args: ['dist/services/healthcare-mcp-server.js']
+    args: ['dist/services/patient-mcp-server.js']
   }
 ]);
 

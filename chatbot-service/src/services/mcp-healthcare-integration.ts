@@ -380,7 +380,7 @@ export const mcpHealthcareConfig = {
     {
       name: 'fhir-server',
       command: 'node',
-      args: ['dist/services/healthcare-mcp-server.js']
+      args: ['dist/services/patient-mcp-server.js']
     },
     // Could add more MCP servers for different healthcare systems
     // {

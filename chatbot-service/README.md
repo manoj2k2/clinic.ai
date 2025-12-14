@@ -106,7 +106,7 @@ MCP provides a standardized protocol for secure AI model access to external tool
 
 ### MCP Components
 
-- **`healthcare-mcp-server.ts`** - MCP server providing secure healthcare tools
+- **`patient-mcp-server.ts`** - MCP server providing secure healthcare tools
 - **`mcp-healthcare-integration.ts`** - Integration layer for LangChain agents
 - **`MCP_HEALTHCARE_INTEGRATION.md`** - Detailed integration guide
 
@@ -124,12 +124,27 @@ node test-mcp-integration.js
 
 The MCP server provides these secure healthcare tools:
 
-- **Patient Lookup**: Secure patient data access with authorization
-- **Appointment Management**: Schedule and manage appointments
-- **Symptom Assessment**: AI-powered symptom screening
-- **Emergency Detection**: Identify urgent medical situations
-- **Practitioner Search**: Find healthcare providers
-- **Audit Logging**: Comprehensive compliance tracking
+#### Core Patient Operations
+- **Patient Lookup**: Secure patient demographics access with authorization
+- **Appointment Management**: Schedule and manage appointments with availability checking
+- **Patient Observations**: Retrieve vital signs, lab results, and clinical observations
+
+#### Clinical Data Recording
+- **Symptom Recording**: Record patient-reported symptoms as structured FHIR observations
+- **Vital Signs Recording**: Record measurements (temperature, blood pressure, heart rate, etc.)
+- **Custom Observations**: Create any type of FHIR observation with validation
+
+#### Clinical Intelligence
+- **Symptom Assessment**: AI-powered symptom analysis and triage recommendations
+- **Emergency Detection**: Analyze text for medical emergencies and immediate guidance
+- **Practitioner Search**: Find available healthcare providers by specialty and location
+
+#### System Operations
+- **FHIR Health Check**: Check server connectivity and health status
+- **Server Capabilities**: Retrieve supported FHIR resources and operations
+- **Audit Logging**: Comprehensive compliance tracking for all operations
+
+All tools include HIPAA-compliant authorization, audit trails, and error handling.
 
 ## �🔌 API Endpoints
 
