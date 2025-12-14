@@ -37,6 +37,10 @@ export class PatientPortalComponent implements OnInit, OnDestroy {
   // reschedule state
   rescheduleMode = false;
   rescheduleValue: string | null = null;
+  
+  // chatbot state
+  showChatbot = false;
+  
   public Roles = Roles;
 
   private destroy$ = new Subject<void>();
@@ -147,6 +151,20 @@ export class PatientPortalComponent implements OnInit, OnDestroy {
    */
   canSwitchPatient(): boolean {
     return this.availablePatients.length > 1;
+  }
+
+  /**
+   * Toggle chatbot modal
+   */
+  toggleChatbot() {
+    this.showChatbot = !this.showChatbot;
+  }
+
+  /**
+   * Close chatbot modal
+   */
+  closeChatbot() {
+    this.showChatbot = false;
   }
 
   /**
