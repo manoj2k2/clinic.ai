@@ -1,0 +1,58 @@
+name: Deploy to Server
+
+on:
+  workflow_run:
+    workflows: ["Build and Push to GHCR"]
+    types: ["completed"]
+    branches: ["main"]
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    steps:
+      - name: Set OWNER env
+        run: echo "OWNER=${{ github.repository_owner }}" >> $GITHUB_ENV
+
+      - name: Upload infra compose files
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          source: "infra/*"
+          target: "${{ secrets.DEPLOY_PATH }}/infra"
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          script: |
+            set -e
+            echo "Logging in to GHCR..."
+            docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} -p ${{ secrets.GHCR_PAT }}
+
+            echo "Starting infra stack..."
+            cd ${{ secrets.DEPLOY_PATH }}/infra
+            docker compose pull || true
+            docker compose up -d
+
+            echo "Pulling application images..."
+            docker pull ghcr.io/${{ env.OWNER }}/clinicai-fe:latest
+            docker pull ghcr.io/${{ env.OWNER }}/clinicai-chatbot:latest
+
+            echo "Restarting frontend container..."
+            docker rm -f clinicai-fe || true
+            docker run -d --name clinicai-fe --restart=always -p 4200:80 ghcr.io/${{ env.OWNER }}/clinicai-fe:latest
+
+            echo "Restarting chatbot-service container..."
+            docker rm -f clinicai-chatbot || true
+            docker run -d --name clinicai-chatbot --restart=always -p 3001:3001 ghcr.io/${{ env.OWNER }}/clinicai-chatbot:latest
