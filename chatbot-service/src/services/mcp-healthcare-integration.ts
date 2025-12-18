@@ -211,6 +211,51 @@ export class MCPHealthcareAgentService {
       toolCalls.push('fhir_appointments_lookup');
     }
 
+    // Clinical operations (doctor tools)
+    if (lowerMessage.includes('order lab') || lowerMessage.includes('lab test') ||
+        lowerMessage.includes('blood work') || lowerMessage.includes('lab order')) {
+      toolCalls.push('order_lab_test');
+    }
+
+    if (lowerMessage.includes('order imaging') || lowerMessage.includes('x-ray') ||
+        lowerMessage.includes('ct scan') || lowerMessage.includes('mri') ||
+        lowerMessage.includes('ultrasound')) {
+      toolCalls.push('order_imaging');
+    }
+
+    if (lowerMessage.includes('prescribe') || lowerMessage.includes('prescription') ||
+        lowerMessage.includes('medication') || lowerMessage.includes('rx')) {
+      toolCalls.push('prescribe_medication');
+    }
+
+    if (lowerMessage.includes('clinical note') || lowerMessage.includes('progress note') ||
+        lowerMessage.includes('assessment') || lowerMessage.includes('soap note')) {
+      toolCalls.push('create_clinical_note');
+    }
+
+    if (lowerMessage.includes('medication history') || lowerMessage.includes('current meds') ||
+        lowerMessage.includes('medications list')) {
+      toolCalls.push('get_medication_history');
+    }
+
+    if (lowerMessage.includes('drug interaction') || lowerMessage.includes('interaction check')) {
+      toolCalls.push('check_drug_interactions');
+    }
+
+    if (lowerMessage.includes('care plan') || lowerMessage.includes('treatment plan')) {
+      toolCalls.push('create_care_plan');
+    }
+
+    if (lowerMessage.includes('clinical summary') || lowerMessage.includes('patient summary') ||
+        lowerMessage.includes('chart review')) {
+      toolCalls.push('get_patient_clinical_summary');
+    }
+
+    if (lowerMessage.includes('alert') || lowerMessage.includes('reminder') ||
+        lowerMessage.includes('due for')) {
+      toolCalls.push('get_clinical_alerts');
+    }
+
     return toolCalls;
   }
 
@@ -301,6 +346,105 @@ export class MCPHealthcareAgentService {
           patientId: context.patientId
         };
 
+      case 'get_patient_clinical_summary':
+        return {
+          patientId: context.patientId || 'unknown',
+          providerId: context.userId || 'system'
+        };
+
+      case 'create_clinical_note':
+        return {
+          patientId: context.patientId || 'unknown',
+          providerId: context.userId || 'system',
+          encounterId: undefined, // Would be determined from context
+          subjective: 'Patient reported symptoms',
+          objective: 'Clinical findings',
+          assessment: 'Clinical assessment',
+          plan: 'Treatment plan'
+        };
+
+      case 'order_lab_test':
+        return {
+          patientId: context.patientId || 'unknown',
+          providerId: context.userId || 'system',
+          encounterId: undefined,
+          tests: [
+            {
+              code: 'CBC',
+              display: 'Complete Blood Count',
+              priority: 'routine'
+            }
+          ]
+        };
+
+      case 'order_imaging':
+        return {
+          patientId: context.patientId || 'unknown',
+          providerId: context.userId || 'system',
+          encounterId: undefined,
+          modality: 'X-ray',
+          bodySite: 'Chest',
+          priority: 'routine',
+          clinicalIndication: 'Clinical indication'
+        };
+
+      case 'prescribe_medication':
+        return {
+          patientId: context.patientId || 'unknown',
+          providerId: context.userId || 'system',
+          encounterId: undefined,
+          medicationCode: 'med-code',
+          medicationName: 'Medication Name',
+          dosage: {
+            value: 1,
+            unit: 'tablet',
+            frequency: 'once daily',
+            period: 1,
+            periodUnit: 'days'
+          },
+          instructions: 'Take as directed',
+          indication: 'Medical condition'
+        };
+
+      case 'create_encounter':
+        return {
+          patientId: context.patientId || 'unknown',
+          providerId: context.userId || 'system',
+          encounterType: 'outpatient',
+          reason: 'Clinical visit',
+          location: 'Clinic'
+        };
+
+      case 'get_medication_history':
+        return {
+          patientId: context.patientId || 'unknown',
+          providerId: context.userId || 'system',
+          includeInactive: false
+        };
+
+      case 'check_drug_interactions':
+        return {
+          medications: ['medication1', 'medication2'],
+          patientId: context.patientId
+        };
+
+      case 'create_care_plan':
+        return {
+          patientId: context.patientId || 'unknown',
+          providerId: context.userId || 'system',
+          title: 'Care Plan',
+          description: 'Patient care plan',
+          goals: [],
+          activities: []
+        };
+
+      case 'get_clinical_alerts':
+        return {
+          patientId: context.patientId || 'unknown',
+          providerId: context.userId || 'system',
+          alertTypes: ['preventive-care', 'chronic-condition']
+        };
+
       default:
         return baseArgs;
     }
@@ -381,6 +525,11 @@ export const mcpHealthcareConfig = {
       name: 'fhir-server',
       command: 'node',
       args: ['dist/services/patient-mcp-server.js']
+    },
+    {
+      name: 'doctor-server',
+      command: 'node',
+      args: ['dist/services/doctor-mcp-server.js']
     },
     // Could add more MCP servers for different healthcare systems
     // {
