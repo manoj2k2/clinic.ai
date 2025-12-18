@@ -9,6 +9,7 @@
       <nav class="main-nav desktop-nav" *ngIf="auth.hasRole(Roles.Patient)">
         <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>    
         <a routerLink="/patient-portal" routerLinkActive="active">My Portal</a>
+       <a routerLink="/chatbot" routerLinkActive="active">Assistant</a>   
       </nav>
       
       <nav class="main-nav desktop-nav" *ngIf="auth.hasRole(Roles.Practitioner)">
@@ -76,6 +77,10 @@
         <a routerLink="/patient-portal" routerLinkActive="active" (click)="toggleMobileMenu()">
           <i class="pi pi-user"></i>
           <span>My Portal</span>
+        </a>
+        <a routerLink="/chatbot" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <i class="pi pi-robot"></i>
+          <span>Assistant</span>
         </a>
       </ng-container>
 

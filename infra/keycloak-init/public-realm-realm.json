@@ -1,0 +1,91 @@
+{
+  "realm": "public-realm",
+  "enabled": true,
+  "clients": [
+    {
+      "clientId": "clinic-fe",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "bearerOnly": false,
+      "rootUrl": "http://localhost:4200",
+      "redirectUris": [
+        "http://localhost:4200/*",
+        "http://localhost:4200"
+      ],
+      "webOrigins": [
+        "http://localhost:4200",
+        "http://localhost:4200/*"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:4200/*"
+      }
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "patient",
+        "description": "Patient role"
+      },
+      {
+        "name": "practitioner",
+        "description": "Practitioner role"
+      },
+      {
+        "name": "admin",
+        "description": "Admin role"
+      },
+      {
+        "name": "clinician",
+        "description": "Clinician role"
+      },
+      {
+        "name": "staff",
+        "description": "Staff role"
+      },
+      {
+        "name": "billing",
+        "description": "Billing role"
+      },
+      {
+        "name": "researcher",
+        "description": "Researcher role"
+      },
+      {
+        "name": "auditor",
+        "description": "Auditor role"
+      }
+    ]
+  },
+  "users": [
+    {
+      "username": "patient",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "patient",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["patient"]
+    },
+    {
+      "username": "doctor",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "doctor",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["practitioner"]
+    }
+  ]
+}

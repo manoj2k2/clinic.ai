@@ -3,7 +3,7 @@ import { Pool } from 'pg';
 // Connection pool for chatbot database
 export const chatbotPool = new Pool({
   host: process.env.POSTGRES_HOST || 'localhost',
-  port: parseInt(process.env.POSTGRES_PORT || '5430'),
+  port: parseInt(process.env.POSTGRES_PORT || '5433'),
   user: process.env.POSTGRES_USER || 'admin',
   password: process.env.POSTGRES_PASSWORD || 'admin',
   database: process.env.CHATBOT_DATABASE || 'chatbot',
@@ -23,6 +23,19 @@ export const fhirPool = new Pool({
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
 });
+
+/**
+ * Get the chatbot database connection pool
+ */
+export function getDb() {
+  console.log('Getting chatbot database connection');
+  console.log(`Database: ${process.env.CHATBOT_DATABASE || 'chatbot'}`);
+  console.log(`Host: ${process.env.POSTGRES_HOST}`);
+  console.log(`Port: ${process.env.POSTGRES_PORT}`);
+  console.log(`User: ${process.env.POSTGRES_USER}`);
+
+  return chatbotPool;
+}
 
 // Test connection
 export async function testConnection() {

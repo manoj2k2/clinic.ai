@@ -1,15 +1,27 @@
 import express from 'express';
-import cors from 'cors';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import dotenv from 'dotenv';
-import path from 'path';
+import swaggerUi from 'swagger-ui-express';
 import { testConnection } from './database';
-import { ConversationModel } from './models/conversation.model';
-import { SessionService } from './services/session.service';
-import { chatWithAI, testAI, getProviderInfo } from './ai-provider';
-import { fhirClient } from './services/fhir-client.service';
+import { testAI } from './ai-provider';
+import { swaggerSpec } from './config/swagger.config';
+import { 
+  errorHandler, 
+  notFoundHandler 
+} from './middleware/error.middleware';
+import { 
+  requestLogger, 
+  corsMiddleware,
+  validateContentType 
+} from './middleware/logger.middleware';
+import { setupWebSocketHandlers } from './websocket/socket.handler';
 
+// Import routes
+import healthRoutes from './routes/health.routes';
+import conversationRoutes from './routes/conversation.routes';
+import userPatientRoutes from './routes/user-patient.routes';
+import healthcareRoutes from './routes/healthcare.routes';
 
 // Load environment variables
 dotenv.config();
@@ -23,46 +35,102 @@ const io = new Server(httpServer, {
   }
 });
 
-app.use(cors());
-app.use(express.json());
+// =====================================================
+// MIDDLEWARE
+// =====================================================
 
-// Startup checks
+app.use(corsMiddleware);
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(requestLogger);
+app.use(validateContentType);
+
+// =====================================================
+// SWAGGER API DOCUMENTATION
+// =====================================================
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'Clinic.AI Chatbot API',
+  customfavIcon: '/favicon.ico'
+}));
+
+// Serve swagger.json
+app.get('/api-docs.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
+
+// =====================================================
+// API ROUTES
+// =====================================================
+
+app.use('/', healthRoutes);
+app.use('/api/conversations', conversationRoutes);
+app.use('/api/users', userPatientRoutes);
+app.use('/api/healthcare', healthcareRoutes);
+
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({
+    service: 'Clinic.AI Chatbot Service',
+    version: '1.0.0',
+    status: 'running',
+    documentation: {
+      swagger: '/api-docs',
+      openapi: '/api-docs.json'
+    },
+    endpoints: {
+      health: '/health',
+      websocket: 'ws://localhost:' + (process.env.PORT || 3001),
+      conversations: '/api/conversations',
+      userPatientMapping: '/api/users/:userId/patients',
+      healthcare: '/api/healthcare'
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
+// =====================================================
+// WEBSOCKET SETUP
+// =====================================================
+
+setupWebSocketHandlers(io);
+
+// =====================================================
+// ERROR HANDLING
+// =====================================================
+
+app.use(notFoundHandler);
+app.use(errorHandler);
+
+// =====================================================
+// STARTUP
+// =====================================================
+
 async function startup() {
-  console.log('🚀 Starting Chatbot Service...');
-  console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log('\n' + '='.repeat(60));
+  console.log('🚀 Starting Clinic.AI Chatbot Service');
+  console.log('='.repeat(60));
+  console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🤖 AI Provider: ${process.env.AI_PROVIDER || 'gemini'}`);
+  console.log(`🐘 Database: PostgreSQL (${process.env.CHATBOT_DATABASE || 'chatbot'})`);
   
   try {
     // Test database connection
+    console.log('\n🔌 Testing connections...');
     await testConnection();
     
-    // Get and display AI provider info
-    const providerInfo = getProviderInfo();
-    console.log(`🤖 AI Provider: ${providerInfo.provider.toUpperCase()}`);
-    console.log(`   Model: ${providerInfo.model}`);
-    console.log(`   Configured: ${providerInfo.configured ? '✅' : '❌'}`);
-    
     // Test AI provider
-    console.log('🧪 Testing AI provider...');
+    console.log('🤖 Testing AI provider...');
     const aiWorks = await testAI();
     if (aiWorks) {
-      console.log('✅ AI provider test successful');
+      console.log('✅ AI provider configured correctly');
     } else {
       console.warn('⚠️  AI provider test failed - check your API key');
     }
     
-    // Test FHIR server connection
-    console.log('🧪 Testing FHIR server...');
-    const fhirHealthy = await fhirClient.healthCheck();
-    if (fhirHealthy) {
-      console.log('✅ FHIR server connected');
-      console.log(`   Base URL: ${process.env.FHIR_BASE_URL}`);
-    } else {
-      console.warn('⚠️  FHIR server not reachable - patient data features may not work');
-      console.warn(`   Check if HAPI FHIR server is running at ${process.env.FHIR_BASE_URL}`);
-    }
-    
-    console.log('✅ All systems ready!');
-
+    console.log('\n✅ All startup checks passed!');
   } catch (error) {
     console.error('❌ Startup failed:', error);
     process.exit(1);
@@ -72,238 +140,43 @@ async function startup() {
 startup();
 
 // =====================================================
-// REST API ENDPOINTS
-// =====================================================
-
-// Health check
-app.get('/health', async (req, res) => {
-  try {
-    const activeSessionsCount = await SessionService.getActiveCount();
-    res.json({ 
-      status: 'ok', 
-      service: 'chatbot-service',
-      version: '1.0.0',
-      database: 'postgresql',
-      activeSessions: activeSessionsCount,
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      message: 'Health check failed'
-    });
-  }
-});
-
-// Test chat page
-app.get('/test', (req, res) => {
-  console.log('Test chat page requested');
-  res.sendFile(path.join(__dirname,'..', 'test-chat.html'));
-});
-
-app.get('/test-chat.html', (req, res) => {
-  console.log('Test chat page requested');
-  res.sendFile(path.join(__dirname, '..', 'test-chat.html'));
-}); 
-
-// Get conversation history
-app.get('/api/conversations/:sessionId', async (req, res) => {
-  try {
-    const { sessionId } = req.params;
-    const data = await ConversationModel.getWithMessages(sessionId);
-    
-    if (!data) {
-      return res.status(404).json({
-        success: false,
-        error: 'Conversation not found'
-      });
-    }
-    
-    res.json({
-      success: true,
-      conversation: data.conversation,
-      messages: data.messages
-    });
-  } catch (error) {
-    console.error('Error fetching conversation:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch conversation'
-    });
-  }
-});
-
-// Get patient conversation history
-app.get('/api/patients/:patientId/conversations', async (req, res) => {
-  try {
-    const { patientId } = req.params;
-    const limit = parseInt(req.query.limit as string) || 10;
-    
-    const conversations = await ConversationModel.getPatientHistory(patientId, limit);
-    
-    res.json({
-      success: true,
-      conversations
-    });
-  } catch (error) {
-    console.error('Error fetching patient history:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch patient history'
-    });
-  }
-});
-
-// =====================================================
-// WEBSOCKET HANDLERS
-// =====================================================
-
-io.on('connection', async (socket) => {
-  const sessionId = socket.handshake.query.sessionId as string || socket.id;
-  const patientId = socket.handshake.query.patientId as string;
-  
-  console.log(`✅ Client connected: ${sessionId}`);
-  
-  try {
-    // Get or create session
-    let session = await SessionService.get(sessionId);
-    if (!session) {
-      session = {
-        sessionId,
-        patientId,
-        startTime: new Date().toISOString(),
-        messageCount: 0,
-        lastActivity: new Date().toISOString()
-      };
-      await SessionService.set(sessionId, session);
-    }
-
-    // Get or create conversation
-    let conversationData = await ConversationModel.findBySessionId(sessionId);
-    if (!conversationData) {
-      conversationData = await ConversationModel.create(sessionId, patientId);
-      console.log(`📝 Created new conversation: ${conversationData.id}`);
-    } else {
-      console.log(`📝 Resumed conversation: ${conversationData.id}`);
-    }
-
-    // Send connection confirmation
-    socket.emit('connected', { 
-      sessionId,
-      conversationId: conversationData.id,
-      message: 'Connected to AI Medical Assistant',
-      timestamp: new Date().toISOString()
-    });
-
-    // Handle incoming messages
-    socket.on('message', async (data) => {
-      try {
-        console.log(`📨 [${sessionId}] User: ${data.content}`);
-
-        // Add user message to database
-        await ConversationModel.addMessage(
-          conversationData!.id!,
-          'user',
-          data.content
-        );
-
-        // Emit typing indicator
-        socket.emit('typing', { isTyping: true });
-
-        // Get conversation history for context
-        const history = await ConversationModel.getWithMessages(sessionId);
-        const aiHistory = history!.messages.map(m => ({
-          role: m.role,
-          content: m.content
-        }));
-
-        // Get AI response
-        const aiResult = await chatWithAI(data.content, aiHistory);
-
-        // Stop typing indicator
-        socket.emit('typing', { isTyping: false });
-
-        if (!aiResult.success) {
-          socket.emit('error', { 
-            message: aiResult.response,
-            timestamp: new Date().toISOString()
-          });
-          return;
-        }
-
-        console.log(`🤖 [${sessionId}] AI: ${aiResult.response?.substring(0, 100)}...`);
-
-        // Save AI response to database
-        await ConversationModel.addMessage(
-          conversationData!.id!,
-          'assistant',
-          aiResult.response || 'Sorry, I could not generate a response.'
-        );
-
-        // Update session
-        session!.messageCount++;
-        session!.lastActivity = new Date().toISOString();
-        await SessionService.set(sessionId, session!, 1800); // 30 min TTL
-
-        // Send response to client
-        socket.emit('response', {
-          message: aiResult.response,
-          timestamp: new Date().toISOString()
-        });
-
-      } catch (error) {
-        console.error(`❌ Error processing message:`, error);
-        socket.emit('error', { 
-          message: 'Failed to process your message. Please try again.',
-          timestamp: new Date().toISOString()
-        });
-      }
-    });
-
-    // Handle typing indicator from client
-    socket.on('typing', (data) => {
-      // Could broadcast to other clients or log
-      console.log(`⌨️  [${sessionId}] User is typing: ${data.isTyping}`);
-    });
-
-    // Handle disconnect
-    socket.on('disconnect', async () => {
-      console.log(`❌ Client disconnected: ${sessionId}`);
-      
-      // Update conversation status if needed
-      // await ConversationModel.updateStatus(sessionId, 'ended');
-    });
-
-  } catch (error) {
-    console.error('Error in socket connection:', error);
-    socket.emit('error', { 
-      message: 'Connection error. Please refresh and try again.',
-      timestamp: new Date().toISOString()
-    });
-  }
-});
-
-// =====================================================
 // START SERVER
 // =====================================================
 
 const PORT = parseInt(process.env.PORT || '3001');
 
 httpServer.listen(PORT, () => {
-  const providerInfo = getProviderInfo();
-  console.log('\n' + '='.repeat(50));
-  console.log(`🤖 AI Chatbot Service Running`);
-  console.log('='.repeat(50));
-  console.log(`📡 HTTP Server:     http://localhost:${PORT}`);
-  console.log(`🔌 WebSocket:       ws://localhost:${PORT}`);
-  console.log(`📊 Health Check:    http://localhost:${PORT}/health`);
-  console.log(`🧪 Test Chat:       http://localhost:${PORT}/test`);
-  console.log(`🐘 Database:        PostgreSQL (${process.env.CHATBOT_DATABASE})`);
-  console.log(`🤖 AI Provider:     ${providerInfo.provider.toUpperCase()} (${providerInfo.model})`);
-  console.log('='.repeat(50) + '\n');
+  console.log('\n' + '='.repeat(60));
+  console.log('✅ Server is Running');
+  console.log('='.repeat(60));
+  console.log(`📡 HTTP Server:      http://localhost:${PORT}`);
+  console.log(`📚 API Docs:         http://localhost:${PORT}/api-docs`);
+  console.log(`📄 OpenAPI Spec:     http://localhost:${PORT}/api-docs.json`);
+  console.log(`🔌 WebSocket:        ws://localhost:${PORT}`);
+  console.log(`💚 Health Check:     http://localhost:${PORT}/health`);
+  console.log('='.repeat(60) + '\n');
+  
+  console.log('📋 Available Endpoints:');
+  console.log('  GET  /                              - Service info');
+  console.log('  GET  /health                        - Health check');
+  console.log('  GET  /health/db                     - Database health');
+  console.log('  GET  /api/conversations/:sessionId  - Get conversation');
+  console.log('  GET  /api/conversations/patients/:patientId - Patient history');
+  console.log('  DELETE /api/conversations/:sessionId - End conversation');
+  console.log('  GET  /api/conversations/stats       - Statistics');
+  console.log('  GET  /api/users/:userId/patients    - Get user\'s patients');
+  console.log('  POST /api/users/:userId/patients    - Add patient to user');
+  console.log('  GET  /api/users/:userId/patients/primary - Get primary patient');
+  console.log('  PUT  /api/users/:userId/patients/:patientId/primary - Set primary');
+  console.log('  DELETE /api/users/:userId/patients/:patientId - Remove patient');
+  console.log('  WS   /socket.io                     - WebSocket connection');
+  console.log('\n' + '='.repeat(60) + '\n');
 });
 
-// Graceful shutdown
+// =====================================================
+// GRACEFUL SHUTDOWN
+// =====================================================
+
 process.on('SIGTERM', () => {
   console.log('SIGTERM received, shutting down gracefully...');
   httpServer.close(() => {
@@ -311,3 +184,13 @@ process.on('SIGTERM', () => {
     process.exit(0);
   });
 });
+
+process.on('SIGINT', () => {
+  console.log('\nSIGINT received, shutting down gracefully...');
+  httpServer.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
+});
+
+export { app, httpServer, io };

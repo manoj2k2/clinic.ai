@@ -5,14 +5,12 @@
 
 # Step 1: Create the chatbot database
 Write-Host "Step 1: Creating chatbot database..." -ForegroundColor Cyan
-docker exec -i fhirdbserver psql -U admin -d postgres -f /chatbot-db-setup.sql
+docker exec -i postgres_chatdb psql -U chatuser -d chatdb -f /docker-entrypoint-initdb.d/001_user_patient_mapping.sql
 
 if ($LASTEXITCODE -eq 0) {
-    Write-Host "✅ Database created successfully!" -ForegroundColor Green
+    Write-Host "✅ Database tables created successfully!" -ForegroundColor Green
 } else {
-    Write-Host "❌ Database creation failed. Make sure PostgreSQL is running." -ForegroundColor Red
-    Write-Host "Run: docker ps | findstr fhirdbserver" -ForegroundColor Yellow
-    exit 1
+    Write-Host "⚠️  Database may already exist or migration skipped (this is OK)" -ForegroundColor Yellow
 }
 
 # Step 2: Install dependencies

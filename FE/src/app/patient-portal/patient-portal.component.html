@@ -1,8 +1,54 @@
 <div class="page-container">
     <div class="page-header">
-        <h3>Patient Portal</h3>
-        <span class="text-secondary" *ngIf="patient">Welcome, {{ patient.name?.[0]?.given?.[0] }} {{
-            patient.name?.[0]?.family }}</span>
+        <div class="header-left">
+            <h3>Patient Portal</h3>
+            <span class="text-secondary" *ngIf="patient">Welcome, {{ getCurrentPatientName() }}</span>
+        </div>
+
+        <!-- Patient Selector -->
+        <div class="patient-selector-container" *ngIf="!isLoadingPatients && availablePatients.length > 0">
+            <div class="patient-selector" (click)="togglePatientSelector()" [class.clickable]="canSwitchPatient()">
+                <span class="patient-icon">👤</span>
+                <span class="patient-name">{{ getCurrentPatientName() }}</span>
+                <span class="dropdown-arrow" *ngIf="canSwitchPatient()">▼</span>
+            </div>
+            
+            <!-- Dropdown Menu -->
+            <div class="patient-dropdown" *ngIf="showPatientSelector && canSwitchPatient()">
+                <div 
+                    *ngFor="let patient of availablePatients"
+                    class="patient-option"
+                    [class.selected]="patient.id === selectedPatientId"
+                    (click)="switchPatient(patient.id); showPatientSelector = false"
+                >
+                    <span class="option-label">{{ patient.label }}</span>
+                    <span class="check-mark" *ngIf="patient.id === selectedPatientId">✓</span>
+                </div>
+                
+                <!-- Add Patient Separator -->
+                <div class="dropdown-separator"></div>
+                
+                <!-- Add Patient Option -->
+                <div class="patient-option add-patient-option" routerLink="/patients/new" (click)="showPatientSelector = false">
+                    <span class="option-label">
+                        <i class="pi pi-plus" style="margin-right: 8px;"></i>
+                        Add Patient
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Patients -->
+        <div class="patient-selector loading" *ngIf="isLoadingPatients">
+            <span class="patient-icon">⏳</span>
+            <span>Loading patients...</span>
+        </div>
+
+        <!-- Chatbot Button -->
+        <button class="chatbot-btn" (click)="toggleChatbot()" title="Open AI Assistant">
+            <i class="pi pi-comments"></i>
+            <span class="chatbot-label">AI Assistant</span>
+        </button>
     </div>
 
     <div *ngIf="loading" class="loading">Loading your profile...</div>
@@ -161,6 +207,126 @@
 </div>
 
 <style>
+    /* Patient Header */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .header-left {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    /* Patient Selector */
+    .patient-selector-container {
+        position: relative;
+        min-width: 250px;
+    }
+
+    .patient-selector {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        background: var(--primary-color);
+        color: white;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.2s;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .patient-selector.clickable {
+        cursor: pointer;
+    }
+
+    .patient-selector.clickable:hover {
+        background: var(--primary-hover);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        transform: translateY(-1px);
+    }
+
+    .patient-selector.loading {
+        background: var(--neutral-bg);
+        color: var(--text-secondary);
+    }
+
+    .patient-icon {
+        font-size: 18px;
+    }
+
+    .patient-name {
+        flex: 1;
+        font-weight: 500;
+    }
+
+    .dropdown-arrow {
+        font-size: 10px;
+        transition: transform 0.2s;
+    }
+
+    .patient-dropdown {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 0;
+        right: 0;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+        z-index: 1000;
+        animation: dropdown 0.2s ease-out;
+        border: 1px solid var(--border-color);
+    }
+
+    @keyframes dropdown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .patient-option {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        color: var(--text-main);
+        cursor: pointer;
+        transition: background 0.2s;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .patient-option:last-child {
+        border-bottom: none;
+    }
+
+    .patient-option:hover {
+        background: var(--bg-main);
+    }
+
+    .patient-option.selected {
+        background: linear-gradient(135deg, #ebf8ff 0%, #f0f5ff 100%);
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+
+    .check-mark {
+        color: var(--primary-color);
+        font-weight: bold;
+        font-size: 16px;
+    }
+
     .portal-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -368,3 +534,18 @@
         color: #2f855a;
     }
 </style>
+
+<!-- Chatbot Modal -->
+<div class="chatbot-modal-overlay" *ngIf="showChatbot" (click)="closeChatbot()">
+    <div class="chatbot-modal" (click)="$event.stopPropagation()">
+        <div class="chatbot-modal-header">
+            <h4>AI Medical Assistant</h4>
+            <button class="chatbot-close-btn" (click)="closeChatbot()" title="Close">
+                <i class="pi pi-times"></i>
+            </button>
+        </div>
+        <div class="chatbot-modal-body">
+            <app-chatbot></app-chatbot>
+        </div>
+    </div>
+</div>

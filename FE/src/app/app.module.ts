@@ -23,6 +23,7 @@ import { FhirService } from './services/fhir.service';
 import { practitionerPortalDashboardComponent } from './practitioner-portal/practitioner-portal.component';
 import { PatientPortalComponent } from './patient-portal/patient-portal.component';
 import { SharedModule } from './common/shared.module';
+import { ChatbotModule } from './chatbot/chatbot.module';
 
 @NgModule({
   declarations: [AppComponent, practitionerPortalDashboardComponent, PatientPortalComponent],
@@ -32,6 +33,7 @@ import { SharedModule } from './common/shared.module';
     ObservationModule, AppointmentModule, MedicationRequestModule,
      CoverageModule, PractitionerRoleModule,
       LocationModule,
+      ChatbotModule,
       OAuthModule.forRoot()],
   providers: [AuthService, FhirService],
   bootstrap: [AppComponent]

@@ -1,7 +1,7 @@
 services:
 
   fhir:
-    image: hapiproject/hapi:v5.3.0
+    image: hapiproject/hapi:latest-tomcat
     container_name: hapi_fhir_server
     ports:
       - "8082:8080"
@@ -40,7 +40,7 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak
     command: start-dev
-    container_name: keycloak_server
+    container_name: keycloak
     environment:
       KC_DB: postgres
       KC_DB_URL_HOST: postgres
@@ -49,21 +49,16 @@ services:
       KC_DB_USERNAME: admin
       KC_DB_SCHEMA: public
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
-      KC_BOOTSTRAP_ADMIN_PASSWORD: password
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
     ports:
       - 8081:8080
     depends_on:
       - postgres
-  # frontendApp:
-  #   build:
-  #     context: ../FE
-  #     dockerfile: Dockerfile
-  #   image: clinic_fe
-  #   container_name: clinic_fe
-  #   ports:
-  #     - "4200:80"
-  #   depends_on:
-  #     - fhir
+    volumes:
+      - ./keycloak-init/public-realm-realm.json:/opt/keycloak/data/import/public-realm-realm.json:ro
+    networks:
+      - clinicai_network
+
   postgres:
     image: postgres
     container_name: keycloak_data_server
@@ -77,8 +72,36 @@ services:
       test: "exit 0"
     ports:
       - 5432:5432
+    networks:
+      - clinicai_network
+
+  postgres_chatdb:
+    image: postgres
+    container_name: postgres_chatdb
+    environment:
+      POSTGRES_DB: chatdb
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_chatdb_data:/var/lib/postgresql/data
+      # Run initialization and migration SQL files on first startup
+      - ./init:/docker-entrypoint-initdb.d
+      # Mount migrations directly to init directory (subfolders are ignored by entrypoint)
+      - ./migrationschat:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d chatdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data: {}
   keycloak_data: {}
   postgres_fhir_data: {}
+  postgres_chatdb_data: {}
+
+networks:
+  clinicai_network:
+    driver: bridge
