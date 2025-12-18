@@ -54,16 +54,40 @@ services:
       - 8081:8080
     depends_on:
       - postgres
-  # frontendApp:
-  #   build:
-  #     context: ../FE
-  #     dockerfile: Dockerfile
-  #   image: clinic_fe
-  #   container_name: clinic_fe
-  #   ports:
-  #     - "4200:80"
-  #   depends_on:
-  #     - fhir
+  frontendApp:
+    build:
+      context: ../FE
+      dockerfile: Dockerfile
+    image: clinic_fe
+    container_name: clinic_fe
+    ports:
+      - "4200:80"
+    depends_on:
+      - fhir
+      - chatbot-service
+
+  chatbot-service:
+    build:
+      context: ../chatbot-service
+      dockerfile: Dockerfile
+    image: clinic_chatbot_service
+    container_name: clinic_chatbot_service
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: 3001
+      NODE_ENV: production
+      CHATBOT_DATABASE: chatbot
+      CHATBOT_DB_USER: admin
+      CHATBOT_DB_PASSWORD: admin
+      CHATBOT_DB_HOST: postgres
+      CHATBOT_DB_PORT: 5432
+      WEBSOCKET_CORS_ORIGIN: http://localhost:4200
+      AI_PROVIDER: gemini
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
   postgres:
     image: postgres
     container_name: keycloak_data_server
