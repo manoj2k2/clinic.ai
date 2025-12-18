@@ -1,0 +1,20 @@
+{
+  "name": "clinicai-fhir-to-openehr",
+  "version": "0.1.0",
+  "description": "Adapter: Forward selected FHIR resources to openEHR",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "ts-node src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "axios": "^1.7.7",
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
+  }
+}
