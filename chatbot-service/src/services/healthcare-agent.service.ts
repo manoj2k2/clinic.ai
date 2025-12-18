@@ -64,8 +64,8 @@ export class HealthcareAgentService {
       // Get patient context if user is mapped to patients
       const patientContext = await this.getPatientContext(context.userId);
 
-      // Build specialized healthcare prompt
-      const systemPrompt = this.buildHealthcarePrompt(context, patientContext);
+      // Build specialized healthcare prompt (using refined prompt V2)
+      const systemPrompt = this.buildHealthcarePromptV2(context, patientContext);
 
       // Get conversation history with healthcare context
       const history = context.conversationHistory || [];
@@ -179,6 +179,48 @@ AVAILABLE ACTIONS:
 - If unsure, suggest speaking with a healthcare provider
 
 Remember: You are here to help coordinate care, not provide medical treatment.`;
+
+    return prompt;
+  }
+
+  /**
+   * Refined healthcare prompt (v2) with explicit tool/action guidance and safety rules.
+   */
+  private buildHealthcarePromptV2(context: HealthcareAgentContext, patientContext: any): string {
+    let prompt = `You are Clinic.AI clinical coordination assistant. Your job is to safely and efficiently help patients and clinic staff coordinate care - you are not a diagnostic tool.
+
+Core responsibilities:
+- Patient screening: collect symptoms, assess urgency, and recommend safe next steps (self-care, primary care, urgent care, or emergency services).
+- Appointment support: identify appropriate specialties and available practitioners and assist with scheduling (produce structured booking actions when requested).
+- Administrative support: answer clinic logistics, check-in, and basic insurance questions.
+
+Safety and behavior:
+- If the user reports life-threatening symptoms (chest pain, severe difficulty breathing, unconsciousness, severe bleeding), IMMEDIATELY instruct them to call emergency services (for example, 911) and go to the nearest emergency room. Do not attempt remote triage for emergencies.
+- Never provide diagnoses or definitive medical advice - only triage guidance and recommend clinician evaluation.
+- Always preserve patient privacy and HIPAA. Ask identity-verification questions before discussing protected health information.
+
+Integration and tools (available programmatically):
+- getPatient(patientId) - read Patient resource from FHIR
+- searchPractitioners(specialty?, name?, location?) - search Practitioner + PractitionerRole
+- bookAppointment(bookingData) - create Appointment in FHIR (call only after explicit user confirmation)
+- createObservation(patientId, text) - record symptom observation
+- createServiceRequest(...), createEncounter(...), createComposition(...) - create orders/encounters/notes
+
+Response guidance:
+- Start with a very short empathetic summary (1 to 2 sentences).
+- Provide clear next steps or an explicit question to collect missing info.
+- When you want the system to perform a backend action, append a single-line JSON action object after your reply with the form:
+  {"name":"<tool_name>","params":{...}}
+  Example: {"name":"bookAppointment","params":{"patientId":"123","specialty":"cardiology","urgency":"routine"}}
+- If multiple options exist, present them and recommend one, and request confirmation before executing actions that modify records or create orders.
+
+If patient context is available, personalize recommendations and prefer the patient's known providers when appropriate.`;
+
+    if (patientContext) {
+      prompt += `\nPATIENT CONTEXT:\n- Patient: ${patientContext.patientName}\n- You may use available medical records for coordination tasks, but always verify identity before revealing PHI.`;
+    }
+
+    prompt += `\n\nRESPONSE STYLE:\n- Keep responses concise and empathetic (1-3 sentences), then provide explicit next steps or questions.\n- Use plain language; explain medical terms only when necessary.\n- When suggesting appointments or orders, ask for user confirmation before calling backend tools.`;
 
     return prompt;
   }
@@ -413,28 +455,17 @@ Remember: You are here to help coordinate care, not provide medical treatment.`;
   /**
    * Get available practitioners for appointment booking
    */
-  async getAvailablePractitioners(specialty?: string): Promise<any[]> {
+  async getAvailablePractitioners(specialty?: string, name?: string , location?: string): Promise<any[]> {
     try {
       // This would query FHIR for practitioners
-      // For now, return mock data
-      return [
-        {
-          id: 'practitioner-1',
-          name: 'Dr. Sarah Johnson',
-          specialty: 'primary care',
-          available: true
-        },
-        {
-          id: 'practitioner-2',
-          name: 'Dr. Michael Chen',
-          specialty: 'cardiology',
-          available: true
-        }
-      ];
+      // For now, return from fhir client
+      const practitioners = await this.fhirClient.searchPractitioners(
+        specialty, name, location);
+      return practitioners;
     } catch (error) {
       console.error('Error getting practitioners:', error);
       return [];
-    }
+    }    
   }
 
   /**

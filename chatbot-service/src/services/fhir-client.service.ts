@@ -1,10 +1,10 @@
+
 import axios from 'axios';
 
 // Define axios types inline since @types/axios may not be working properly
 type AxiosInstance = any;
 type AxiosError = any;
-
-
+ 
 /**
  * FHIR Client Service
  * 
@@ -546,6 +546,109 @@ export class FhirClientService {
       console.error('❌ FHIR health check failed:', error);
       return false;
     }
+  }
+
+  // =====================================================
+  // Doctor MCP FHIR operations (stubs to implement)
+  // These will be called by the Doctor MCP server and should
+  // interact with the HAPI FHIR backend appropriately.
+  // =====================================================
+
+  async searchPatients(args: { name?: string; identifier?: string; birthDate?: string }): Promise<any> {
+    // TODO: implement patient search via /Patient?_query or query parameters
+    throw new Error('searchPatients not implemented');
+  }
+
+  /**
+   * Search for practitioners with optional specialty, name, and location filters.
+   * Returns a simplified list combining Practitioner and PractitionerRole data.
+   */
+  async searchPractitioners(specialty?: string, name?: string, location?: string, max: number = 50): Promise<any[]> {
+    try {
+      const params: any = { _count: Math.min(max, 100) };
+
+      if (name) params.name = name;
+
+      // Query Practitioners (filtered by name if provided)
+      const resp = await this.client.get('/Practitioner', { params });
+      const entries = resp.data?.entry || [];
+      const practitioners: any[] = entries.map((e: any) => e.resource);
+
+      const results: any[] = [];
+
+      for (const p of practitioners) {
+        const pid = p.id;
+
+        // Fetch PractitionerRole resources for this practitioner
+        const roleResp = await this.client.get('/PractitionerRole', { params: { practitioner: `Practitioner/${pid}`, _count: 50 } });
+        const roles = roleResp.data?.entry ? roleResp.data.entry.map((r: any) => r.resource) : [];
+
+        // Apply specialty & location filters against roles
+        let matchedRoles = roles;
+        if (specialty) {
+          const lc = specialty.toLowerCase();
+          matchedRoles = matchedRoles.filter((r: any) => (r.specialty || []).some((s: any) => {
+            const display = (s.coding || [])[0]?.display || '';
+            const code = (s.coding || [])[0]?.code || '';
+            return display.toLowerCase().includes(lc) || code.toLowerCase().includes(lc) || (s.text || '').toLowerCase().includes(lc);
+          }));
+        }
+
+        if (location) {
+          const lc = location.toLowerCase();
+          matchedRoles = matchedRoles.filter((r: any) => (r.location || []).some((loc: any) => (loc.display || '').toLowerCase().includes(lc)));
+        }
+
+        // If a specialty was requested but no roles matched, skip this practitioner
+        if (specialty && matchedRoles.length === 0) continue;
+
+        results.push({
+          id: pid,
+          name: this.getPractitionerDisplayName(p),
+          resource: p,
+          roles: matchedRoles,
+          telecom: p.telecom || []
+        });
+      }
+
+      return results;
+    } catch (error) {
+      if (error instanceof FhirError) throw error;
+      throw new FhirError(`Failed to search practitioners: ${(error as Error).message}`);
+    }
+  }
+
+  private getPractitionerDisplayName(practitioner: any): string {
+    if (!practitioner?.name || practitioner.name.length === 0) return 'Practitioner';
+    const name = practitioner.name[0];
+    const given = (name.given || []).join(' ') || '';
+    const family = name.family || '';
+    return `${given} ${family}`.trim() || 'Practitioner';
+  }
+
+  async getPatientConditions(patientId: string, clinicalStatus?: string): Promise<any> {
+    // TODO: implement Condition search for patient
+    throw new Error('getPatientConditions not implemented');
+  }
+
+  async getPatientMedications(patientId: string, status?: string): Promise<any> {
+    // TODO: implement MedicationRequest/MedicationStatement search for patient
+    throw new Error('getPatientMedications not implemented');
+  }
+
+  async createServiceRequest(args: any): Promise<any> {
+    // TODO: implement ServiceRequest creation (lab/imaging orders)
+    throw new Error('createServiceRequest not implemented');
+  }
+
+  async createEncounter(args: any): Promise<any> {
+    // TODO: implement Encounter creation
+    throw new Error('createEncounter not implemented');
+  }
+
+  async createComposition(args: any): Promise<any> {
+    // TODO: implement Composition creation (clinical notes)
+    throw new Error('createComposition not implemented');
   }
 
   /**
