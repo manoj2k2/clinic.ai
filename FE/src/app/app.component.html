@@ -7,13 +7,19 @@
       </div> 
       <!-- Desktop Navigation -->
       <nav class="main-nav desktop-nav" *ngIf="auth.hasRole(Roles.Patient)">
+        <a routerLink="/home" routerLinkActive="active">Home</a>
         <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>    
         <a routerLink="/patient-portal" routerLinkActive="active">My Portal</a>
        <a routerLink="/chatbot" routerLinkActive="active">Assistant</a>   
+       <a routerLink="/self-onboard" routerLinkActive="active">Self-Onboard</a>
+       <a routerLink="/guide/self-onboard" routerLinkActive="active">User Guide</a>
       </nav>
       
       <nav class="main-nav desktop-nav" *ngIf="auth.hasRole(Roles.Practitioner)">
+        <a routerLink="/home" routerLinkActive="active">Home</a>
         <a routerLink="/practitioner-portal" routerLinkActive="active">Dashboard</a>
+        <a routerLink="/self-onboard" routerLinkActive="active">Self-Onboard</a>
+        <a routerLink="/guide/self-onboard" routerLinkActive="active">User Guide</a>
         
         <div class="nav-group">
           <button class="nav-group-btn">Clinical <i class="pi pi-chevron-down"></i></button>
@@ -70,6 +76,10 @@
     <div class="mobile-nav-links">
       <!-- Patient Mobile Links -->
       <ng-container *ngIf="auth.hasRole(Roles.Patient)">
+        <a routerLink="/home" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <i class="pi pi-home"></i>
+          <span>Home</span>
+        </a>
         <a routerLink="/dashboard" routerLinkActive="active" (click)="toggleMobileMenu()">
           <i class="pi pi-home"></i>
           <span>Dashboard</span>
@@ -82,13 +92,33 @@
           <i class="pi pi-robot"></i>
           <span>Assistant</span>
         </a>
+        <a routerLink="/self-onboard" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <i class="pi pi-user-plus"></i>
+          <span>Self-Onboard</span>
+        </a>
+        <a routerLink="/guide/self-onboard" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <i class="pi pi-book"></i>
+          <span>User Guide</span>
+        </a>
       </ng-container>
 
       <!-- Practitioner Mobile Links -->
       <ng-container *ngIf="auth.hasRole(Roles.Practitioner)">
+        <a routerLink="/home" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <i class="pi pi-home"></i>
+          <span>Home</span>
+        </a>
         <a routerLink="/practitioner-portal" routerLinkActive="active" (click)="toggleMobileMenu()">
           <i class="pi pi-home"></i>
           <span>Dashboard</span>
+        </a>
+        <a routerLink="/self-onboard" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <i class="pi pi-user-plus"></i>
+          <span>Self-Onboard</span>
+        </a>
+        <a routerLink="/guide/self-onboard" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <i class="pi pi-book"></i>
+          <span>User Guide</span>
         </a>
         
         <div class="mobile-group-title">Clinical</div>

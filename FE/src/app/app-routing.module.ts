@@ -31,12 +31,18 @@ import { LocationEditorComponent } from './location/location-editor.component';
 import { practitionerPortalDashboardComponent } from './practitioner-portal/practitioner-portal.component';
 import { PatientPortalComponent } from './patient-portal/patient-portal.component';
 import { ChatbotComponent } from './chatbot/chatbot.component';
+import { SelfOnboardComponent } from './practitioner/self-onboard.component';
+import { HomeComponent } from './home/home.component';
+import { SelfOnboardGuideComponent } from './guide/self-onboard-guide.component';
 
 const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+  { path: '', pathMatch: 'full', redirectTo: 'home' },
+  { path: 'home', component: HomeComponent },
+  { path: 'guide/self-onboard', component: SelfOnboardGuideComponent },
   { path: 'chatbot', component: ChatbotComponent },
   { path: 'practitioner-portal', component: practitionerPortalDashboardComponent },
   { path: 'patient-portal', component: PatientPortalComponent },
+  { path: 'self-onboard', component: SelfOnboardComponent },
   { path: 'patients', component: PatientListComponent },
   { path: 'patients/new', component: PatientEditorComponent },
   { path: 'patients/:id/observations', component: PatientObservationListComponent },
@@ -76,6 +82,7 @@ const routes: Routes = [
   , { path: 'locations/new', component: LocationEditorComponent }
   , { path: 'locations/:id', component: LocationEditorComponent }
   , { path: 'encounters', loadChildren: () => import('./encounter/encounter.module').then(m => m.EncounterModule) }
+  , { path: 'self-onboard', component: SelfOnboardComponent }
 ];
 
 @NgModule({

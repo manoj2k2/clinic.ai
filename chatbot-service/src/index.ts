@@ -22,6 +22,7 @@ import healthRoutes from './routes/health.routes';
 import conversationRoutes from './routes/conversation.routes';
 import userPatientRoutes from './routes/user-patient.routes';
 import healthcareRoutes from './routes/healthcare.routes';
+import practitionerRoutes from './routes/practitioner.routes';
 
 // Load environment variables
 dotenv.config();
@@ -69,6 +70,7 @@ app.use('/', healthRoutes);
 app.use('/api/conversations', conversationRoutes);
 app.use('/api/users', userPatientRoutes);
 app.use('/api/healthcare', healthcareRoutes);
+app.use('/api/practitioners', practitionerRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {

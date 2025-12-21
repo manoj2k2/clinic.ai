@@ -24,9 +24,13 @@ import { practitionerPortalDashboardComponent } from './practitioner-portal/prac
 import { PatientPortalComponent } from './patient-portal/patient-portal.component';
 import { SharedModule } from './common/shared.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
+import { SelfOnboardComponent } from './practitioner/self-onboard.component';
+import { OnboardingService } from './services/onboarding.service';
+import { HomeComponent } from './home/home.component';
+import { SelfOnboardGuideComponent } from './guide/self-onboard-guide.component';
 
 @NgModule({
-  declarations: [AppComponent, practitionerPortalDashboardComponent, PatientPortalComponent],
+  declarations: [AppComponent, practitionerPortalDashboardComponent, PatientPortalComponent, SelfOnboardComponent, HomeComponent, SelfOnboardGuideComponent],
   imports: [BrowserModule, HttpClientModule, FormsModule, AppRoutingModule, PatientModule,
     SharedModule, PractitionerModule, ConsentModule, 
     OrganizationModule, DiagnosticReportModule, InvoiceModule, 
@@ -35,7 +39,7 @@ import { ChatbotModule } from './chatbot/chatbot.module';
       LocationModule,
       ChatbotModule,
       OAuthModule.forRoot()],
-  providers: [AuthService, FhirService],
+  providers: [AuthService, FhirService, OnboardingService],
   bootstrap: [AppComponent]
 
 })
