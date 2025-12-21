@@ -73,3 +73,99 @@ jobs:
           labels: ${{ steps.meta_backend.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      # FHIR → openEHR adapter image
+      - name: Extract openehr adapter metadata
+        id: meta_openehr
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}-fhir-openehr
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha
+
+      - name: Build and push FHIR→openEHR adapter
+        uses: docker/build-push-action@v6
+        with:
+          context: ./fhir-adapter/fhir-to-openehr
+          file: ./fhir-adapter/fhir-to-openehr/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta_openehr.outputs.tags }}
+          labels: ${{ steps.meta_openehr.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # FHIR → KIM/Email adapter image
+      - name: Extract email adapter metadata
+        id: meta_email
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}-fhir-email
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha
+
+      - name: Build and push FHIR→Email adapter
+        uses: docker/build-push-action@v6
+        with:
+          context: ./fhir-adapter/fhir-to-kim-email
+          file: ./fhir-adapter/fhir-to-kim-email/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta_email.outputs.tags }}
+          labels: ${{ steps.meta_email.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # ToFHIR CSV adapter image
+      - name: Extract ToFHIR CSV metadata
+        id: meta_tofhir_csv
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}-tofhir-csv
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha
+
+      - name: Build and push ToFHIR CSV adapter
+        uses: docker/build-push-action@v6
+        with:
+          context: ./fhir-adapter/tofhir-csv
+          file: ./fhir-adapter/tofhir-csv/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta_tofhir_csv.outputs.tags }}
+          labels: ${{ steps.meta_tofhir_csv.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # ToFHIR HL7v2 adapter image
+      - name: Extract ToFHIR HL7v2 metadata
+        id: meta_tofhir_hl7
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}-tofhir-hl7v2
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha
+
+      - name: Build and push ToFHIR HL7v2 adapter
+        uses: docker/build-push-action@v6
+        with:
+          context: ./fhir-adapter/tofhir-hl7v2
+          file: ./fhir-adapter/tofhir-hl7v2/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta_tofhir_hl7.outputs.tags }}
+          labels: ${{ steps.meta_tofhir_hl7.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
